@@ -1,0 +1,72 @@
+<div th:fragment="modal" class="modal fade" id="evaluacionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Evaluación de Examen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="evaluacionForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Alumno</label>
+                            <input type="text" class="form-control" id="nombreAlumno" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha del Examen</label>
+                            <input type="text" class="form-control" id="fechaExamen" readonly>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Criterios de Evaluación</label>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Criterio</th>
+                                        <th>Puntuación (1-10)</th>
+                                        <th>Observaciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="criterio : ${criteriosEvaluacion}">
+                                        <td th:text="${criterio.nombre}">Técnica</td>
+                                        <td>
+                                            <input type="number" class="form-control" 
+                                                   th:name="'puntuacion_' + ${criterio.id}"
+                                                   min="1" max="10" required>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control"
+                                                   th:name="'observacion_' + ${criterio.id}">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Resultado Final</label>
+                        <select class="form-select" name="resultado" required>
+                            <option value="APROBADO">Aprobado</option>
+                            <option value="REPROBADO">Reprobado</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Observaciones Generales</label>
+                        <textarea class="form-control" name="observacionesGenerales" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarEvaluacion()">
+                    Guardar Evaluación
+                </button>
+            </div>
+        </div>
+    </div>
+</div> 

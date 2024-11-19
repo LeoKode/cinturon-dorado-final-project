@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/base :: head"></head>
+<body>
+    <div th:fragment="content">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-4">Bienvenido a Cinturón Dorado</h1>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Tarjetas de estadísticas -->
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Alumnos</h5>
+                        <p class="card-text display-6" th:text="${totalAlumnos}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Clases Hoy</h5>
+                        <p class="card-text display-6" th:text="${clasesHoy}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">Pagos Pendientes</h5>
+                        <p class="card-text display-6" th:text="${pagosPendientes}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Próximos Exámenes</h5>
+                        <p class="card-text display-6" th:text="${proximosExamenes}">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

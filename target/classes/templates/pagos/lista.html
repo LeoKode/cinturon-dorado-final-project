@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/base :: head"></head>
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Gestión de Pagos</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoPagoModal">
+                Registrar Pago
+            </button>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form id="searchPagosForm" class="row g-3">
+                    <div class="col-md-3">
+                        <select class="form-select" id="alumnoSelect" name="alumnoId">
+                            <option value="">Seleccionar Alumno</option>
+                            <option th:each="alumno : ${alumnos}"
+                                    th:value="${alumno.id}"
+                                    th:text="${alumno.nombre}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="estadoSelect" name="estado">
+                            <option value="">Todos los estados</option>
+                            <option value="PENDIENTE">Pendiente</option>
+                            <option value="PAGADO">Pagado</option>
+                            <option value="VENCIDO">Vencido</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" class="form-control" id="fechaDesde" name="fechaDesde">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-secondary w-100">Filtrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabla de pagos -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Alumno</th>
+                        <th>Monto</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="pago : ${pagos}">
+                        <td th:text="${pago.id}">1</td>
+                        <td th:text="${pago.alumno.nombre}">Juan Pérez</td>
+                        <td th:text="${'$' + pago.monto}">$100.00</td>
+                        <td th:text="${#temporals.format(pago.fecha, 'dd/MM/yyyy')}">01/01/2024</td>
+                        <td>
+                            <span th:class="${'badge ' + 
+                                (pago.estado == 'PAGADO' ? 'bg-success' : 
+                                (pago.estado == 'PENDIENTE' ? 'bg-warning' : 'bg-danger'))}"
+                                  th:text="${pago.estado}">
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary"
+                                        th:if="${pago.estado == 'PENDIENTE'}"
+                                        th:onclick="'registrarPago(' + ${pago.id} + ')'">
+                                    Registrar Pago
+                                </button>
+                                <button class="btn btn-sm btn-outline-info"
+                                        th:onclick="'verDetalles(' + ${pago.id} + ')'">
+                                    Ver Detalles
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Nuevo Pago -->
+    <div th:replace="pagos/modal-pago :: modal"></div>
+</body>
+</html> 

@@ -1,0 +1,26 @@
+/* Estilos personalizados */
+.card {
+    transition: transform 0.2s;
+    border: none;
+    border-radius: 10px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.display-6 {
+    font-size: 2.5rem;
+    font-weight: 300;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .display-6 {
+        font-size: 2rem;
+    }
+} 
