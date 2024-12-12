@@ -1,4 +1,5 @@
 #!/bin/bash
+java -version
 
 # Establece la variable JAVA_HOME (puedes adaptarlo si el entorno ya tiene Java)
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
