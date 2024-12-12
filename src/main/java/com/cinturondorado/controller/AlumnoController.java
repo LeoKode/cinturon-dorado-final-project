@@ -33,6 +33,7 @@ public class AlumnoController {
             model.addAttribute("alumnos", alumnos);
             model.addAttribute("nivelesCinturon", NivelCinturon.values());
             model.addAttribute("alumno", new Alumno()); // Agregar un objeto Alumno vacío
+            model.addAttribute("content", "alumnos/lista :: content"); // Asegúrate de que esto esté correcto
             return "alumnos/lista";
         } catch (Exception e) {
             model.addAttribute("error", "Error al cargar los alumnos: " + e.getMessage());

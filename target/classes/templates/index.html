@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout/base :: head"></head>
+<head th:replace="~{layout/base :: head}">
+</head>
 <body>
-    <div th:fragment="content">
+    <nav th:replace="~{layout/base :: nav}"></nav>
+    
+    <main class="container my-4">
         <div class="row mb-4">
             <div class="col-12">
                 <h1 class="display-4">Bienvenido a Cinturón Dorado</h1>
             </div>
         </div>
-
         <div class="row g-4">
             <!-- Tarjetas de estadísticas -->
             <div class="col-md-3">
@@ -19,7 +21,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-md-3">
                 <div class="card bg-success text-white">
                     <div class="card-body">
@@ -28,7 +29,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-md-3">
                 <div class="card bg-warning text-dark">
                     <div class="card-body">
@@ -37,7 +37,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-md-3">
                 <div class="card bg-info text-white">
                     <div class="card-body">
@@ -47,6 +46,15 @@
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Botón para actualizar -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <a href="/" class="btn btn-primary">Actualizar estadísticas</a>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{layout/base :: scripts}"></div>
 </body>
-</html> 
+</html>
