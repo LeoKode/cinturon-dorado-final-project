@@ -1,10 +1,12 @@
 #!/bin/bash
 
-# Instalar Java (OpenJDK 11)
-apt-get update && apt-get install -y openjdk-11-jdk
+# Descargar e instalar Java manualmente
+curl -L -o openjdk.tar.gz https://download.java.net/java/GA/jdk11/13/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz
+mkdir -p /opt/java
+tar -xzf openjdk.tar.gz -C /opt/java
 
-# Establecer JAVA_HOME
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+# Configurar JAVA_HOME y PATH
+export JAVA_HOME=/opt/java/jdk-11.0.2
 export PATH=$JAVA_HOME/bin:$PATH
 
 # Verificar la instalación de Java
@@ -12,4 +14,3 @@ java -version
 
 # Compilar el proyecto con Maven Wrapper
 ./mvnw clean package
-
