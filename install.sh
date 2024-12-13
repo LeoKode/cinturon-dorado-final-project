@@ -3,8 +3,8 @@
 # Crear un directorio temporal para el JDK en el proyecto
 mkdir -p ./java
 
-# Descargar OpenJDK 11
-curl -L -o openjdk.tar.gz https://download.java.net/java/GA/jdk11/13/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz
+# Descargar OpenJDK 11 desde una fuente confiable (Adoptium)
+curl -L -o openjdk.tar.gz https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.20.1%2B1/OpenJDK11U-jdk_x64_linux_hotspot_11.0.20.1_1.tar.gz
 
 # Extraer el JDK al directorio temporal
 tar -xzf openjdk.tar.gz -C ./java --strip-components=1
@@ -18,4 +18,3 @@ java -version
 
 # Compilar el proyecto con Maven Wrapper
 ./mvnw clean package
-
