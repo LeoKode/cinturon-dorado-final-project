@@ -17,6 +17,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.ColumnTransformer;
+
 import com.cinturondorado.model.enums.NivelCinturon;
 
 import lombok.Getter;
@@ -37,7 +39,7 @@ public class Alumno {
     private Integer edad;
     
     @Enumerated(EnumType.STRING)
-    @Column(name = "nivel_cinturon", nullable = true)
+    @ColumnTransformer(write = "?::nivel_cinturon_enum")
     private NivelCinturon nivelCinturon;
     
     @OneToMany(mappedBy = "alumno")
