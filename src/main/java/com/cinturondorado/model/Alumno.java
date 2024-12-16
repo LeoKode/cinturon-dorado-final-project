@@ -37,6 +37,7 @@ public class Alumno {
     private Integer edad;
     
     @Enumerated(EnumType.STRING)
+    @Column(name = "nivel_cinturon", nullable = true)
     private NivelCinturon nivelCinturon;
     
     @OneToMany(mappedBy = "alumno")
