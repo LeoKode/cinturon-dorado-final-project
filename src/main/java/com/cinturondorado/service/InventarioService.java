@@ -15,6 +15,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @Transactional
 public class InventarioService {
@@ -29,17 +32,26 @@ public class InventarioService {
     }
 
     public Inventario agregarItem(InventarioDTO inventarioDTO) {
-        Inventario item = new Inventario();
-        item.setNombre(inventarioDTO.getNombre());
-        item.setCantidad(inventarioDTO.getCantidad());
-        item.setDescripcion(inventarioDTO.getDescripcion());
-        item.setTipo(inventarioDTO.getTipo());
-        item.setStockMinimo(inventarioDTO.getStockMinimo());
-        item.setFechaUltimaActualizacion(LocalDate.now());
+        try {
+            log.debug("Iniciando conversión de DTO a entidad: {}", inventarioDTO);
+            Inventario item = new Inventario();
+            item.setNombre(inventarioDTO.getNombre());
+            item.setCantidad(inventarioDTO.getCantidad());
+            item.setDescripcion(inventarioDTO.getDescripcion());
+            item.setTipo(inventarioDTO.getTipo());
+            item.setStockMinimo(inventarioDTO.getStockMinimo());
+            item.setFechaUltimaActualizacion(LocalDate.now());
 
-        Inventario itemGuardado = inventarioRepository.save(item);
-        verificarStockMinimo(itemGuardado);
-        return itemGuardado;
+            log.debug("Intentando guardar item en base de datos");
+            Inventario itemGuardado = inventarioRepository.save(item);
+            log.info("Item guardado exitosamente con ID: {}", itemGuardado.getId());
+
+            verificarStockMinimo(itemGuardado);
+            return itemGuardado;
+        } catch (Exception e) {
+            log.error("Error al guardar item: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     public void actualizarCantidad(Long id, Integer cantidad) {
@@ -78,7 +90,10 @@ public class InventarioService {
     }
 
     public Inventario obtenerPorId(Long id) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'obtenerPorId'");
+    }
+
+    public List<Inventario> obtenerTodoItems() {
+        return inventarioRepository.findAll();
     }
 } 

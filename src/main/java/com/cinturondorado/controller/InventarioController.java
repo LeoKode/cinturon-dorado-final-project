@@ -1,26 +1,24 @@
 package com.cinturondorado.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
+import java.util.List;
 
-import com.cinturondorado.dto.ApiResponse;
 import com.cinturondorado.dto.InventarioDTO;
 import com.cinturondorado.model.Inventario;
 import com.cinturondorado.model.enums.TipoEquipo;
 import com.cinturondorado.service.InventarioService;
+import lombok.extern.slf4j.Slf4j;
 
-@RestController
-@RequestMapping("/api/inventario")
-@PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
+@Slf4j
+@Controller
+@RequestMapping("/inventario")
 public class InventarioController {
     private final InventarioService inventarioService;
 
@@ -28,51 +26,64 @@ public class InventarioController {
     public InventarioController(InventarioService inventarioService) {
         this.inventarioService = inventarioService;
     }
-
-    @PostMapping
-    public ResponseEntity<ApiResponse<InventarioDTO>> agregarItem(
-            @Valid @RequestBody InventarioDTO inventarioDTO) {
-        Inventario item = inventarioService.agregarItem(inventarioDTO);
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.success(convertirADTO(item)));
+    
+    @GetMapping
+    public String listarInventario(Model model) {
+        model.addAttribute("items", inventarioService.obtenerTodoItems());
+        model.addAttribute("inventarioDTO", new InventarioDTO());
+        model.addAttribute("tiposEquipo", TipoEquipo.values());
+        return "inventario/lista";
     }
 
-    @PutMapping("/{id}/cantidad")
-    public ResponseEntity<ApiResponse<InventarioDTO>> actualizarCantidad(
-            @PathVariable Long id,
-            @RequestParam @Min(0) Integer cantidad) {
-        inventarioService.actualizarCantidad(id, cantidad);
-        return ResponseEntity.ok(ApiResponse.success(
-            convertirADTO(inventarioService.obtenerPorId(id))));
+    @PostMapping
+    public String agregarItem(@Valid @ModelAttribute("inventarioDTO") InventarioDTO inventarioDTO,
+                            BindingResult result,
+                            Model model,
+                            RedirectAttributes redirectAttributes) {
+        log.info("Datos recibidos en el controlador: {}", inventarioDTO);
+        
+        if (result.hasErrors()) {
+            log.error("Errores de validación encontrados: {}", result.getAllErrors());
+            model.addAttribute("tiposEquipo", TipoEquipo.values());
+            model.addAttribute("items", inventarioService.obtenerTodoItems());
+            return "inventario/lista :: modal";
+        }
+        
+        try {
+            inventarioService.agregarItem(inventarioDTO);
+            log.info("Item agregado exitosamente");
+            redirectAttributes.addFlashAttribute("mensaje", "Item agregado exitosamente");
+        } catch (Exception e) {
+            log.error("Error al guardar item: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Error al agregar item: " + e.getMessage());
+        }
+        return "redirect:/inventario";
+    }
+
+    @PostMapping("/{id}/cantidad")
+    public String actualizarCantidad(@PathVariable Long id,
+                                   @RequestParam Integer cantidad,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            inventarioService.actualizarCantidad(id, cantidad);
+            redirectAttributes.addFlashAttribute("mensaje", "Cantidad actualizada exitosamente");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al actualizar cantidad: " + e.getMessage());
+        }
+        return "redirect:/inventario";
     }
 
     @GetMapping("/bajo-stock")
-    public ResponseEntity<ApiResponse<List<InventarioDTO>>> obtenerItemsBajoStock() {
+    public String obtenerItemsBajoStock(Model model) {
         List<Inventario> items = inventarioService.obtenerItemsBajoStock();
-        List<InventarioDTO> itemsDTO = items.stream()
-            .map(this::convertirADTO)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(itemsDTO));
+        model.addAttribute("items", items);
+        return "inventario/lista :: tablaInventario";
     }
 
     @GetMapping("/tipo/{tipo}")
-    public ResponseEntity<ApiResponse<List<InventarioDTO>>> obtenerPorTipo(
-            @PathVariable TipoEquipo tipo) {
+    public String obtenerPorTipo(@PathVariable TipoEquipo tipo, Model model) {
         List<Inventario> items = inventarioService.obtenerPorTipo(tipo);
-        List<InventarioDTO> itemsDTO = items.stream()
-            .map(this::convertirADTO)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(itemsDTO));
-    }
-
-    private InventarioDTO convertirADTO(Inventario item) {
-            return new InventarioDTO(
-                item.getId(),
-                item.getNombre(),
-                item.getCantidad(),
-                item.getDescripcion(),
-                item.getTipo(),
-                item.getStockMinimo()
-        );
+        model.addAttribute("items", items);
+        return "inventario/lista :: tablaInventario";
     }
 } 

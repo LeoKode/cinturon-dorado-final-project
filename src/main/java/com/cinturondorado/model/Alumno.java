@@ -39,6 +39,7 @@ public class Alumno {
     private Integer edad;
     
     @Enumerated(EnumType.STRING)
+    // exclusivo para postgresql
     @ColumnTransformer(write = "?::nivel_cinturon_enum")
     private NivelCinturon nivelCinturon;
     

@@ -31,7 +31,6 @@ public class PagoService {
         this.alumnoRepository = alumnoRepository;
         this.notificacionService = notificacionService;
     }
-
     public Pago registrarPago(PagoDTO pagoDTO) {
         Alumno alumno = alumnoRepository.findById(pagoDTO.getAlumnoId())
             .orElseThrow(() -> new ResourceNotFoundException("Alumno no encontrado"));
@@ -61,6 +60,10 @@ public class PagoService {
                 notificacionService.notificarPagoVencido(pago);
             }
         }
+    }
+
+    public List<Pago> obtenerTodosPagos() {
+        return pagoRepository.findAll();
     }
 
     public List<Pago> obtenerPagosPorAlumno(Long alumnoId) {

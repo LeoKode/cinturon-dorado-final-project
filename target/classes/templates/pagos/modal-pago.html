@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="modal" class="modal fade" id="nuevoPagoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Registrar Nuevo Pago</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="pagoForm" th:object="${pagoDTO}" method="post">
+                        <div class="mb-3">
+                            <label for="alumnoId" class="form-label">Alumno</label>
+                            <select class="form-select" id="alumnoId" th:field="*{alumnoId}" required>
+                                <option value="">Seleccionar Alumno</option>
+                                <option th:each="alumno : ${alumnos}"
+                                        th:value="${alumno.id}"
+                                        th:text="${alumno.nombre}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="monto" class="form-label">Monto</label>
+                            <input type="number" class="form-control" id="monto" 
+                                   th:field="*{monto}" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="concepto" class="form-label">Concepto</label>
+                            <input type="text" class="form-control" id="concepto" 
+                                   th:field="*{concepto}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha" class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="fecha" 
+                                   th:field="*{fecha}" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarPago()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
