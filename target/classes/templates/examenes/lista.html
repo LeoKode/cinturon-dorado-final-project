@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="layout/base :: head"></head>
+
 <body>
-    <div th:fragment="content">
+    <nav th:replace="~{layout/base :: nav}"></nav>
+    <div class="container my-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Gestión de Exámenes</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoExamenModal">
-                Programar Examen
+            <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#nuevoExamenModal">
+                <i class="fas fa-plus me-1">Programar Examen</i>
             </button>
         </div>
-
         <!-- Filtros -->
         <div class="card mb-4">
             <div class="card-body">
@@ -17,18 +19,14 @@
                     <div class="col-md-3">
                         <select class="form-select" id="nivelActual" name="nivelActual">
                             <option value="">Nivel Actual</option>
-                            <option th:each="nivel : ${nivelesCinturon}"
-                                    th:value="${nivel}"
-                                    th:text="${nivel}">
+                            <option th:each="nivel : ${nivelesCinturon}" th:value="${nivel}" th:text="${nivel}">
                             </option>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <select class="form-select" id="nivelAspirante" name="nivelAspirante">
                             <option value="">Nivel Aspirante</option>
-                            <option th:each="nivel : ${nivelesCinturon}"
-                                    th:value="${nivel}"
-                                    th:text="${nivel}">
+                            <option th:each="nivel : ${nivelesCinturon}" th:value="${nivel}" th:text="${nivel}">
                             </option>
                         </select>
                     </div>
@@ -41,7 +39,6 @@
                 </form>
             </div>
         </div>
-
         <!-- Tabla de exámenes -->
         <div class="table-responsive">
             <table class="table table-hover">
@@ -56,45 +53,66 @@
                         <th>Acciones</th>
                     </tr>
                 </thead>
+                <!-- ... rest of the file ... -->
                 <tbody>
                     <tr th:each="examen : ${examenes}">
-                        <td th:text="${#temporals.format(examen.fecha, 'dd/MM/yyyy HH:mm')}">
+                        <td
+                            th:text="${examen?.fecha != null ? #temporals.format(examen.fecha, 'dd/MM/yyyy HH:mm') : ''}">
                             01/01/2024
                         </td>
-                        <td th:text="${examen.alumno.nombre}">Juan Pérez</td>
-                        <td th:text="${examen.nivelActual}">BLANCO</td>
-                        <td th:text="${examen.nivelAspirante}">AMARILLO</td>
+                        <td th:text="${examen?.alumno?.nombre ?: 'N/A'}"></td>
+                        <td th:text="${examen?.nivelActual ?: 'N/A'}"></td>
+                        <td th:text="${examen?.nivelAspirante ?: 'N/A'}"></td>
                         <td>
-                            <span th:class="${'badge ' + 
-                                (examen.estado == 'APROBADO' ? 'bg-success' : 
-                                (examen.estado == 'PENDIENTE' ? 'bg-warning' : 'bg-danger'))}"
-                                  th:text="${examen.estado}">
+                            <span th:if="${examen != null and examen.estado != null}" th:class="${'badge ' + 
+                                    (examen.estado.name() == 'APROBADO' ? 'bg-success' : 
+                                    (examen.estado.name() == 'PENDIENTE' ? 'bg-warning' : 'bg-danger'))}"
+                                th:text="${examen.estado.name()}">
                             </span>
+                            <span th:unless="${examen != null and examen.estado != null}"
+                                class="badge bg-secondary">N/A</span>
                         </td>
-                        <td th:text="${examen.evaluador.nombre}">Profesor</td>
+                        <td th:text="${examen?.evaluador?.nombre ?: 'Sin asignar'}">Profesor</td>
                         <td>
                             <div class="btn-group">
                                 <button class="btn btn-sm btn-outline-primary"
-                                        th:if="${examen.estado == 'PENDIENTE'}"
-                                        th:onclick="'evaluarExamen(' + ${examen.id} + ')'">
-                                    Evaluar
+                                    th:if="${examen != null and examen.estado.name() == 'PENDIENTE'}"
+                                    th:onclick="'evaluarExamen(' + ${examen.id} + ')'">
+                                    <i class="fas fa-check-circle me-1">Evaluar</i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-info"
-                                        th:onclick="'verDetallesExamen(' + ${examen.id} + ')'">
-                                    Detalles
+                                <button type="button" class="btn btn-sm btn-outline-info"
+                                    th:onclick="'verDetallesExamen(' + ${examen.id} + ')'">
+                                    <i class="fas fa-eye me-1">Detalles</i>
                                 </button>
                             </div>
                         </td>
                     </tr>
                 </tbody>
+                <!-- ... rest of the file ... -->
             </table>
         </div>
     </div>
 
-    <!-- Modal Nuevo Examen -->
-    <div th:replace="examenes/modal-examen :: modal"></div>
-    
-    <!-- Modal Evaluación -->
-    <div th:replace="examenes/modal-evaluacion :: modal"></div>
+    <!-- Contenedor del modal -->
+    <div class="modal fade" id="detallesExamenModal" tabindex="-1" aria-labelledby="detallesExamenModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content"><!-- Vacío o mínimo --></div>
+        </div>
+    </div>
+    <!-- Contenedor del modal de evaluación -->
+    <div class="modal fade" id="evaluacionModal" tabindex="-1" aria-labelledby="evaluacionModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content"><!-- Vacío o mínimo --></div>
+        </div>
+    </div>
+    <!-- Then place modals before scripts -->
+    <div th:replace="~{examenes/modal-programar-evaluacion :: modal}"></div>
+    <!-- <div th:replace="~{examenes/modal-evaluacion :: modal}"></div> -->
+    <!-- <div th:replace="~{examenes/modal-detalles :: modal}"></div> -->
+    <!-- Finally load all scripts -->
+    <div th:replace="~{layout/base :: scripts}"></div>
 </body>
-</html> 
+
+</html>

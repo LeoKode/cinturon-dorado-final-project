@@ -96,4 +96,10 @@ public class InventarioService {
     public List<Inventario> obtenerTodoItems() {
         return inventarioRepository.findAll();
     }
+
+    public void eliminarItem(Long id) {
+        Inventario item = inventarioRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Item no encontrado"));
+        inventarioRepository.delete(item);
+    }
 } 

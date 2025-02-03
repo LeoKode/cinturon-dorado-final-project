@@ -3,7 +3,6 @@ package com.cinturondorado.service;
 import javax.validation.ValidationException;
 
 import org.hibernate.ResourceClosedException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +20,6 @@ public class AlumnoService {
     private final AlumnoRepository alumnoRepository;
     private final NotificacionService notificacionService;
 
-    @Autowired
     public AlumnoService(AlumnoRepository alumnoRepository, 
                         NotificacionService notificacionService) {
         this.alumnoRepository = alumnoRepository;
@@ -78,7 +76,7 @@ public class AlumnoService {
     }
 
     public List<Alumno> obtenerAlumnosConPagosPendientes() {
-        return alumnoRepository.findByPagoPendienteTrue();
+        return alumnoRepository.findAlumnosConPagosPendientes();
     }
 
     public List<Alumno> listarTodos() {
@@ -92,6 +90,10 @@ public class AlumnoService {
 
     public List<Alumno> buscarPorNombre(String nombre) {
         return alumnoRepository.findByNombreContainingIgnoreCase(nombre);
+    }
+
+    public void actualizarAlumno(Alumno alumno) {
+        alumnoRepository.save(alumno);
     }
 
     public void actualizarAlumno(AlumnoDTO alumnoDTO) {

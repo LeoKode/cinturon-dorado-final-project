@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{layout/base :: head}"></head>
+
 <body>
     <nav th:replace="~{layout/base :: nav}"></nav>
-    
+
     <main class="container my-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Gestión de Inventario</h2>
@@ -19,9 +21,7 @@
                     <div class="col-md-4">
                         <select class="form-select" id="tipoSelect" name="tipo">
                             <option value="">Todos los tipos</option>
-                            <option th:each="tipo : ${tiposEquipo}"
-                                    th:value="${tipo}"
-                                    th:text="${tipo}">
+                            <option th:each="tipo : ${tiposEquipo}" th:value="${tipo}" th:text="${tipo}">
                             </option>
                         </select>
                     </div>
@@ -54,19 +54,26 @@
                         <td th:text="${item.tipo}">UNIFORME</td>
                         <td>
                             <span th:text="${item.cantidad}"
-                                  th:class="${item.cantidad <= item.stockMinimo ? 'text-danger' : ''}">
+                                th:class="${item.cantidad <= item.stockMinimo ? 'text-danger' : ''}">
                                 10
                             </span>
                         </td>
                         <td th:text="${item.stockMinimo}">5</td>
                         <td>
                             <div class="btn-group">
-                                <button class="btn btn-sm btn-outline-primary"
-                                        onclick="abrirModalCantidad(this)"
-                                        th:data-id="${item.id}"
-                                        th:data-cantidad="${item.cantidad}">
+                                <button class="btn btn-sm btn-outline-primary" onclick="abrirModalCantidad(this)"
+                                    th:data-id="${item.id}" th:data-nombre="${item.nombre}" th:data-tipo="${item.tipo}"
+                                    th:data-cantidad="${item.cantidad}" th:data-descripcion="${item.descripcion}"
+                                    th:data-stock-minimo="${item.stockMinimo}">
                                     Actualizar Cantidad
                                 </button>
+                                <form th:action="@{/inventario/{id}/eliminar(id=${item.id})}" method="post"
+                                    style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('¿Estás seguro de que deseas eliminar este ítem?');">
+                                        Eliminar
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -81,4 +88,5 @@
         <div th:replace="~{layout/base :: scripts}"></div>
     </main>
 </body>
-</html> 
+
+</html>

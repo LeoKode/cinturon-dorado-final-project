@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout/base :: head"></head>
+
+<head th:replace="~{layout/base :: head}"></head>
+
 <body>
-    <div th:fragment="content">
+    <nav th:replace="~{layout/base :: nav}"></nav>
+
+    <main class="container my-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Gestión de Clases</h2>
             <div>
@@ -15,86 +19,69 @@
             </div>
         </div>
 
-        <!-- Calendario -->
+        <!-- Calendario y Filtros -->
         <div class="row">
             <div class="col-md-3">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Filtros</h5>
-                        <div class="mb-3">
-                            <label class="form-label">Profesor</label>
-                            <select class="form-select" id="profesorFilter">
-                                <option value="">Todos</option>
-                                <option th:each="profesor : ${profesores}"
-                                        th:value="${profesor.id}"
-                                        th:text="${profesor.nombre}">
-                                </option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Nivel</label>
-                            <select class="form-select" id="nivelFilter">
-                                <option value="">Todos</option>
-                                <option th:each="nivel : ${niveles}"
-                                        th:value="${nivel}"
-                                        th:text="${nivel}">
-                                </option>
-                            </select>
+
+                        <label class="form-label">Profesor</label>
+                        <select class="form-select" id="profesorFilter">
+                            <option value="">Todos</option>
+                            <option th:each="profesor : ${profesores}" th:value="${profesor.id}"
+                                th:text="${profesor.nombre}">
+                            </option>
+                        </select>
+                        <label class="form-label">Nivel</label>
+                        <select class="form-select" id="nivelFilter">
+                            <option value="">Todos</option>
+                            <option th:each="nivel : ${niveles}" th:value="${nivel}" th:text="${nivel}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Add draggable events card -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Clases Disponibles</h5>
+                        <div id="external-events">
+                            <!-- Clases dinámicas -->
+                            <div th:each="clase : ${clases}" th:if="${clase.fechaHora == null}"
+                                class="d-flex align-items-center mb-2">
+                                <!-- Contenido arrastrable -->
+                                <div class="fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event flex-grow-1">
+                                    <div class="fc-event-main"
+                                        th:data-event="|{&quot;title&quot;:&quot;${clase.titulo}&quot;,&quot;duration&quot;:${clase.duracion}}|">
+                                        <span th:text="${clase.titulo}"></span>
+                                    </div>
+                                </div>
+                                <!-- Botón eliminar separado -->
+                                <form th:action="@{/clases/{id}/eliminar(id=${clase.id})}" method="post" class="ms-2">
+                                    <button type="submit" class="btn btn-link text-danger p-0 delete-btn"
+                                        onclick="return confirm('¿Está seguro de eliminar esta clase?')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                            viewBox="0 0 24 24">
+                                            <path fill="currentColor"
+                                                d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z" />
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- Calendario -->
             <div class="col-md-9">
-                <div id="calendario"></div>
+                <div id="calendar" class="shadow-sm"></div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- Modal Nueva Clase -->
-    <div class="modal fade" id="nuevaClaseModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Nueva Clase</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="claseForm">
-                        <div class="mb-3">
-                            <label class="form-label">Profesor</label>
-                            <select class="form-select" name="profesorId" required>
-                                <option value="">Seleccionar profesor</option>
-                                <option th:each="profesor : ${profesores}"
-                                        th:value="${profesor.id}"
-                                        th:text="${profesor.nombre}">
-                                </option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Fecha y Hora</label>
-                            <input type="datetime-local" class="form-control" name="fechaHora" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Duración (minutos)</label>
-                            <input type="number" class="form-control" name="duracion" value="60" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Nivel</label>
-                            <select class="form-select" name="nivel" required>
-                                <option th:each="nivel : ${niveles}"
-                                        th:value="${nivel}"
-                                        th:text="${nivel}">
-                                </option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="guardarClase()">Guardar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div th:replace="~{layout/base :: scripts}"></div>
+    <div th:replace="~{clases/modal-clase :: modal}"></div>
 </body>
-</html> 
+
+</html>

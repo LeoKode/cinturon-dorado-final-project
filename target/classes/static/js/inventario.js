@@ -24,24 +24,53 @@ function mostrarBajoStock() {
 
 function abrirModalCantidad(button) {
     const id = button.getAttribute('data-id');
+    const nombre = button.getAttribute('data-nombre');
+    const tipo = button.getAttribute('data-tipo');
     const cantidad = button.getAttribute('data-cantidad');
-    document.getElementById('itemId').value = id;
-    document.getElementById('cantidad').value = cantidad;
-    new bootstrap.Modal(document.getElementById('actualizarCantidadModal')).show();
+    const descripcion = button.getAttribute('data-descripcion');
+    const stockMinimo = button.getAttribute('data-stock-minimo');
+
+    const modal = new bootstrap.Modal(document.getElementById('actualizarCantidadModal'));
+    const form = document.getElementById('cantidadForm');
+
+    // Establecer la acción del formulario
+    form.action = `/inventario/${id}/cantidad`;
+
+    // Rellenar los campos del formulario
+    form.querySelector('input[name="id"]').value = id;
+    form.querySelector('input[name="nombre"]').value = nombre;
+    form.querySelector('input[name="tipo"]').value = tipo;
+    form.querySelector('input[name="descripcion"]').value = descripcion;
+    form.querySelector('input[name="stockMinimo"]').value = stockMinimo;
+    form.querySelector('input[name="cantidad"]').value = cantidad;
+
+    // Mostrar el modal
+    modal.show();
+}
+
+function guardarCantidad() {
+    const form = document.getElementById('cantidadForm');
+    form.submit();
 }
 
 function actualizarCantidad() {
     const id = document.getElementById('itemId').value;
     const cantidad = document.getElementById('cantidad').value;
     
-    fetch(`/inventario/${id}/cantidad`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `cantidad=${cantidad}`
-    })
-    .then(() => window.location.reload());
+    if (!cantidad || cantidad < 0) {
+        alert('Por favor ingrese una cantidad válida');
+        return;
+    }
+
+    const form = document.getElementById('cantidadForm');
+    form.action = `/inventario/${id}/cantidad`;
+
+    // Cerrar el modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('actualizarCantidadModal'));
+    modal.hide();
+
+    // Enviar el formulario
+    form.submit();
 }
 
 function nuevoItem() {
@@ -59,9 +88,4 @@ function nuevoItem() {
 
     // Mostrar el modal
     modal.show();
-}
-
-function guardarItem() {
-    const form = document.getElementById('itemForm');
-    form.submit();
 }

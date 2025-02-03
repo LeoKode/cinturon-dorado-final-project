@@ -1,6 +1,5 @@
 package com.cinturondorado.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,7 +20,6 @@ public class AlumnoController {
     
     private final AlumnoService alumnoService;
     
-    @Autowired
     public AlumnoController(AlumnoService alumnoService) {
         this.alumnoService = alumnoService;
     }
@@ -32,8 +30,8 @@ public class AlumnoController {
             List<Alumno> alumnos = alumnoService.listarTodos();
             model.addAttribute("alumnos", alumnos);
             model.addAttribute("nivelesCinturon", NivelCinturon.values());
-            model.addAttribute("alumno", new Alumno()); // Agregar un objeto Alumno vacío
-            model.addAttribute("content", "alumnos/lista :: content"); // Asegúrate de que esto esté correcto
+            model.addAttribute("alumno", new Alumno());
+            model.addAttribute("content", "alumnos/lista :: content"); 
             return "alumnos/lista";
         } catch (Exception e) {
             model.addAttribute("error", "Error al cargar los alumnos: " + e.getMessage());
@@ -42,7 +40,7 @@ public class AlumnoController {
     }
     
     @PostMapping
-    public String guardarAlumno(@Valid @ModelAttribute("alumnoDTO") AlumnoDTO alumnoDTO, 
+    public String guardarAlumno(@Valid @ModelAttribute AlumnoDTO alumnoDTO, 
                                BindingResult result,
                                RedirectAttributes redirectAttributes,
                                Model model) {

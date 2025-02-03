@@ -56,78 +56,10 @@ public class Alumno {
     
     private String email;
     
-    // private boolean activo;
-    
     private LocalDate ultimoPago;
-    
-    // Getters
-    public Long getId() {
-        return id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public Integer getEdad() {
-        return edad;
-    }
-
-    public NivelCinturon getNivelCinturon() {
-        return nivelCinturon;
-    }
-
-    public List<Pago> getPagos() {
-        return pagos;
-    }
-
-    public Set<Clase> getClases() {
-        return clases;
-    }
 
     public boolean isPagoPendiente() {
         return pagos.stream()
                 .anyMatch(pago -> !pago.isPagado());
     }
-
-    public String getEmail() {
-        return email;
-    }
-
-    //public boolean isActivo() { return activo; }
-
-    public LocalDate getUltimoPago() { return ultimoPago; }
-
-    // Setters
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public void setEdad(Integer edad) {
-        this.edad = edad;
-    }
-
-    public void setNivelCinturon(NivelCinturon nivelCinturon) {
-        this.nivelCinturon = nivelCinturon;
-    }
-
-    public void setPagos(List<Pago> pagos) {
-        this.pagos = pagos;
-    }
-
-    public void setClases(Set<Clase> clases) {
-        this.clases = clases;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    //public void setActivo(boolean activo) { this.activo = activo; }
-
-    public void setUltimoPago(LocalDate ultimoPago) { this.ultimoPago = ultimoPago; }
 } 

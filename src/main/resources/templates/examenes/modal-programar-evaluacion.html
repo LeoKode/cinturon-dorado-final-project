@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="modal" class="modal fade" id="nuevoExamenModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Programar Nuevo Examen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="examenForm" th:action="@{/examenes}" method="post">
+                        <div class="mb-3">
+                            <label for="alumno.Id" class="form-label">Alumno</label>
+                            <select class="form-select" id="alumno.Id" name="alumno.Id" required>
+                                <option value="">Seleccione un alumno</option>
+                                <option th:each="alumno : ${alumnos}"
+                                        th:value="${alumno.id}"
+                                        th:text="${alumno.nombre}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="evaluadorId" class="form-label">Evaluador</label>
+                            <select class="form-select" id="evaluadorId" name="evaluadorId">
+                                <option value="">Seleccione un evaluador</option>
+                                <option th:each="profesor : ${profesores}"
+                                        th:value="${profesor.id}"
+                                        th:text="${profesor.nombre}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha" class="form-label">Fecha y Hora</label>
+                            <input type="datetime-local" class="form-control" id="fecha" name="fecha" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" form="examenForm" class="btn btn-primary">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

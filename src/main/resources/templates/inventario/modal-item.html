@@ -53,7 +53,7 @@
         </div>
     </div>
 
-    <!-- Modal Actualizar Cantidad -->
+        <!-- Modal Actualizar Cantidad -->
     <div th:fragment="modal-cantidad" class="modal fade" id="actualizarCantidadModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -62,17 +62,21 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="cantidadForm">
-                        <input type="hidden" id="itemId">
+                    <form id="cantidadForm" th:action="@{/inventario}" method="post">
+                        <input type="hidden" name="id">
+                        <input type="hidden" name="nombre">
+                        <input type="hidden" name="tipo">
+                        <input type="hidden" name="descripcion">
+                        <input type="hidden" name="stockMinimo">
                         <div class="mb-3">
                             <label for="cantidad" class="form-label">Nueva Cantidad</label>
-                            <input type="number" class="form-control" id="cantidad" required min="0">
+                            <input type="number" class="form-control" id="cantidad" name="cantidad" required min="0">
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="actualizarCantidad()">Guardar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarCantidad()">Guardar</button>
                 </div>
             </div>
         </div>

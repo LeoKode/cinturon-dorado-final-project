@@ -11,7 +11,8 @@ import java.util.List;
 @Repository
 public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
     List<Alumno> findByNivelCinturon(NivelCinturon nivelCinturon);
-    @Query("SELECT a FROM Alumno a WHERE EXISTS (SELECT p FROM a.pagos p WHERE p.pagado = false)")
-    List<Alumno> findByPagoPendienteTrue();
     List<Alumno> findByNombreContainingIgnoreCase(String nombre);
+
+    @Query("SELECT a FROM Alumno a WHERE EXISTS (SELECT p FROM Pago p WHERE p.alumno = a AND p.pagado = false)")
+    List<Alumno> findAlumnosConPagosPendientes();
 } 
