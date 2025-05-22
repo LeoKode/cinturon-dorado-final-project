@@ -4,9 +4,14 @@ import com.cinturondorado.model.enums.TipoEquipo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Data
 @NoArgsConstructor
@@ -27,4 +32,7 @@ public class InventarioDTO {
     
     @Min(value = 1, message = "El stock mínimo debe ser mayor a 0")
     private Integer stockMinimo;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate fechaUltimaActualizacion;
 } 

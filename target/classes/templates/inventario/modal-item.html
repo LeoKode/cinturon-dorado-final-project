@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <body>
     <!-- Modal Nuevo Item -->
     <div th:fragment="modal" class="modal fade" id="nuevoItemModal" tabindex="-1">
@@ -10,38 +11,43 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="itemForm" th:action="@{/inventario}" th:object="${inventarioDTO}" method="post">
+                    <form id="nuevoItemForm" th:action="@{/inventario}" th:object="${inventarioDTO}" method="post" novalidate>
                         <input type="hidden" th:field="*{id}" />
                         <div class="mb-3">
                             <label for="nombre" class="form-label">Nombre</label>
                             <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+                            <div class="invalid-feedback">El nombre es obligatorio</div>
                             <div class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
                         </div>
                         <div class="mb-3">
                             <label for="tipo" class="form-label">Tipo</label>
                             <select class="form-select" id="tipo" th:field="*{tipo}" required>
                                 <option value="">Seleccione un tipo</option>
-                                <option th:each="tipo : ${tiposEquipo}"
-                                        th:value="${tipo}"
-                                        th:text="${tipo}">
-                                </option>
+                                <option th:each="tipo : ${tiposEquipo}" th:value="${tipo}" th:text="${tipo}"></option>
                             </select>
+                            <div class="invalid-feedback">Debe seleccionar un tipo de equipo</div>
                             <div class="text-danger" th:if="${#fields.hasErrors('tipo')}" th:errors="*{tipo}"></div>
                         </div>
                         <div class="mb-3">
                             <label for="cantidad" class="form-label">Cantidad</label>
-                            <input type="number" class="form-control" id="cantidad" th:field="*{cantidad}" required min="0">
-                            <div class="text-danger" th:if="${#fields.hasErrors('cantidad')}" th:errors="*{cantidad}"></div>
+                            <input type="number" class="form-control" id="cantidad" th:field="*{cantidad}" required
+                                min="0">
+                            <div class="text-danger" th:if="${#fields.hasErrors('cantidad')}" th:errors="*{cantidad}">
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="stockMinimo" class="form-label">Stock Mínimo</label>
-                            <input type="number" class="form-control" id="stockMinimo" th:field="*{stockMinimo}" required min="0">
-                            <div class="text-danger" th:if="${#fields.hasErrors('stockMinimo')}" th:errors="*{stockMinimo}"></div>
+                            <input type="number" class="form-control" id="stockMinimo" th:field="*{stockMinimo}"
+                                required min="0">
+                            <div class="text-danger" th:if="${#fields.hasErrors('stockMinimo')}"
+                                th:errors="*{stockMinimo}"></div>
                         </div>
                         <div class="mb-3">
                             <label for="descripcion" class="form-label">Descripción</label>
-                            <textarea class="form-control" id="descripcion" th:field="*{descripcion}" rows="3"></textarea>
-                            <div class="text-danger" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></div>
+                            <textarea class="form-control" id="descripcion" th:field="*{descripcion}"
+                                rows="3"></textarea>
+                            <div class="text-danger" th:if="${#fields.hasErrors('descripcion')}"
+                                th:errors="*{descripcion}"></div>
                         </div>
                     </form>
                 </div>
@@ -53,33 +59,62 @@
         </div>
     </div>
 
-        <!-- Modal Actualizar Cantidad -->
-    <div th:fragment="modal-cantidad" class="modal fade" id="actualizarCantidadModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Actualizar Cantidad</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="cantidadForm" th:action="@{/inventario}" method="post">
-                        <input type="hidden" name="id">
-                        <input type="hidden" name="nombre">
-                        <input type="hidden" name="tipo">
-                        <input type="hidden" name="descripcion">
-                        <input type="hidden" name="stockMinimo">
-                        <div class="mb-3">
-                            <label for="cantidad" class="form-label">Nueva Cantidad</label>
-                            <input type="number" class="form-control" id="cantidad" name="cantidad" required min="0">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="guardarCantidad()">Guardar</button>
-                </div>
+   <!-- Modal Actualizar Item -->
+<div th:fragment="modal-cantidad" class="modal fade" id="actualizarItemModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Actualizar Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editarItemForm" th:action="@{/inventario}" th:object="${inventarioDTO}" method="post">
+                    <input type="hidden" th:field="*{id}" />
+
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+                        <div class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tipo" class="form-label">Tipo</label>
+                        <select class="form-select" id="tipo" th:field="*{tipo}" required>
+                            <option value="">Seleccione un tipo</option>
+                            <option th:each="tipo : ${tiposEquipo}" 
+                                    th:value="${tipo}" 
+                                    th:text="${tipo}">
+                            </option>
+                        </select>
+                        <div class="text-danger" th:if="${#fields.hasErrors('tipo')}" th:errors="*{tipo}"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cantidad" class="form-label">Cantidad</label>
+                        <input type="number" class="form-control" id="cantidad" th:field="*{cantidad}" required min="0">
+                        <div class="text-danger" th:if="${#fields.hasErrors('cantidad')}" th:errors="*{cantidad}"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="stockMinimo" class="form-label">Stock Mínimo</label>
+                        <input type="number" class="form-control" id="stockMinimo" th:field="*{stockMinimo}" required min="0">
+                        <div class="text-danger" th:if="${#fields.hasErrors('stockMinimo')}" th:errors="*{stockMinimo}"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" th:field="*{descripcion}" rows="3"></textarea>
+                        <div class="text-danger" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarItem()">Guardar</button>
             </div>
         </div>
     </div>
+</div>
 </body>
-</html> 
+
+</html>

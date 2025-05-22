@@ -1,159 +1,149 @@
 package com.cinturondorado.controller;
 
-import java.beans.PropertyEditorSupport;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.cinturondorado.model.Clase;
+import com.cinturondorado.model.HorarioDisponible;
 import com.cinturondorado.service.ClaseService;
-import com.cinturondorado.service.ProfesorService;
+import com.cinturondorado.service.HorarioDisponibleService;
 
 import lombok.extern.slf4j.Slf4j;
-
-import com.cinturondorado.dto.ApiResponse;
-import com.cinturondorado.model.Clase;
-import com.cinturondorado.model.enums.NivelCinturon;
-import com.cinturondorado.model.enums.TipoClase;
 
 @Slf4j
 @Controller
 @RequestMapping("/clases")
 public class ClaseController {
-
     private final ClaseService claseService;
+    private final HorarioDisponibleService horarioService;
 
-    public ClaseController(ClaseService claseService) {
+    public ClaseController(ClaseService claseService, HorarioDisponibleService horarioService) {
         this.claseService = claseService;
-
-    }
-
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-        binder.registerCustomEditor(LocalDateTime.class, new PropertyEditorSupport() {
-            @Override
-            public void setAsText(String text) throws IllegalArgumentException {
-                setValue(text != null ? LocalDateTime.parse(text, formatter) : null);
-            }
-        });
-    }
-
-    @GetMapping("/api/clases")
-    @ResponseBody
-    public List<Map<String, Object>> obtenerClasesParaCalendario() {
-        List<Clase> clases = claseService.listarTodasClases();
-        return clases.stream().map(clase -> {
-            Map<String, Object> eventoCalendario = new HashMap<>();
-            eventoCalendario.put("id", clase.getId());
-            eventoCalendario.put("title", clase.getTitulo());
-            eventoCalendario.put("start", clase.getFechaHora());
-            eventoCalendario.put("duration", clase.getDuracion()); // Enviar la duración real
-    
-            // Calcular la fecha de fin sumando la duración correcta
-            if (clase.getFechaHora() != null) {
-                LocalDateTime fechaFin = clase.getFechaHora().plusMinutes(clase.getDuracion());
-                eventoCalendario.put("end", fechaFin);
-            }
-            
-            return eventoCalendario;
-        }).collect(Collectors.toList());
-    }
-
-    @PostMapping
-    public String guardarClase(@ModelAttribute Clase clase, RedirectAttributes redirectAttributes) {
-        try {
-            log.info("Recibiendo clase para guardar: {}", clase); // Log del objeto recibido
-            log.info("Duración recibida: {}", clase.getDuracion()); // Log específico de la duración
-    
-            if (clase.getFechaHora() == null || clase.getTipo() == null ||
-                    clase.getTitulo() == null || clase.getDuracion() == 0) {
-                throw new IllegalArgumentException("La fecha, tipo, título y duración de la clase son requeridos");
-            }
-    
-            claseService.guardarClase(clase);
-            redirectAttributes.addFlashAttribute("mensaje", "Clase guardada exitosamente");
-            return "redirect:/clases";
-        } catch (Exception e) {
-            log.error("Error al guardar la clase: ", e); // Log de error
-            redirectAttributes.addFlashAttribute("error", "Error al guardar la clase: " + e.getMessage());
-            return "redirect:/clases";
-        }
-    }
-
-    @PostMapping("/plantilla")
-    @ResponseBody
-    public ResponseEntity<Clase> guardarPlantillaClase(@ModelAttribute Clase clase) {
-        try {
-            if (clase.getTitulo() == null || clase.getDuracion() == 0) {
-                throw new IllegalArgumentException("El título y duración de la clase son requeridos");
-            }
-
-            clase.setTipo(
-                    clase.getTitulo().toLowerCase().contains("infantil") ? TipoClase.PRINCIPIANTE : TipoClase.AVANZADO);
-            clase.setFechaHora(null);
-
-            Clase claseGuardada = claseService.guardarPlantillaClase(clase);
-            return ResponseEntity.ok(claseGuardada);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @PostMapping("/{id}/actualizar-fecha")
-    @ResponseBody
-    public ResponseEntity<ApiResponse<Void>> actualizarFechaClase(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> fechaData) {
-        try {
-            LocalDateTime nuevaFecha = LocalDateTime.parse(fechaData.get("fechaHora"));
-            claseService.actualizarFechaClase(id, nuevaFecha);
-            return ResponseEntity.ok(ApiResponse.success(null));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Error al actualizar la fecha: " + e.getMessage()));
-        }
-    }
-
-    @PostMapping("/{id}/eliminar")
-    public String eliminarClase(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        try {
-            claseService.eliminarClase(id);
-            redirectAttributes.addFlashAttribute("mensaje", "Clase eliminada exitosamente");
-            return "redirect:/clases";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al eliminar la clase: " + e.getMessage());
-            return "redirect:/clases";
-        }
+        this.horarioService = horarioService;
     }
 
     @GetMapping
     public String listarClases(Model model) {
-        // Add required data to model
-        // model.addAttribute("profesores", profesorService.listarTodos());
-        model.addAttribute("niveles", NivelCinturon.values());
-        model.addAttribute("clases", claseService.listarTodasClases());
+        try {
+            List<Clase> clases = claseService.listarTodasClases();
+            List<HorarioDisponible> horarios = horarioService.listarHorariosActivos();
+            model.addAttribute("clases", clases);
+            model.addAttribute("horarios", horarios);
+            return "clases/lista";
+        } catch (Exception e) {
+            log.error("Error al cargar las clases: ", e);
+            model.addAttribute("error", "Error al cargar las clases");
+            return "error";
+        }
+    }
 
-        // Set page title
-        model.addAttribute("pageTitle", "Gestión de Clases - Cinturón Dorado");
+    @PostMapping("/guardar")
+    public String guardarClase(@ModelAttribute Clase clase, Model model) {
+        try {
+            if (clase.getId() != null) {
+                if (!claseService.esHorarioDisponibleParaClase(clase.getId(), clase.getDia(), clase.getHoraInicio())) {
+                    model.addAttribute("error", "Ya existe una clase programada para " +
+                            clase.getDia() + " a las " + clase.getHoraInicio());
+                    model.addAttribute("clases", claseService.listarTodasClases());
+                    model.addAttribute("horarios", horarioService.listarHorariosActivos());
+                    return "clases/lista :: tablaClases";
+                }
+            } else if (claseService.existeClaseEnHorario(clase.getDia(), clase.getHoraInicio())) {
+                model.addAttribute("error", "Ya existe una clase programada para " +
+                        clase.getDia() + " a las " + clase.getHoraInicio());
+                model.addAttribute("clases", claseService.listarTodasClases());
+                model.addAttribute("horarios", horarioService.listarHorariosActivos());
+                return "clases/lista :: tablaClases";
+            }
 
-        return "clases/lista";
+            claseService.guardarClase(clase);
+            model.addAttribute("clases", claseService.listarTodasClases());
+            model.addAttribute("horarios", horarioService.listarHorariosActivos());
+            model.addAttribute("mensaje", "Clase guardada correctamente");
+            return "clases/lista :: tablaClases";
+        } catch (Exception e) {
+            log.error("Error al guardar la clase: ", e);
+            model.addAttribute("error", "Error al guardar la clase");
+            model.addAttribute("clases", claseService.listarTodasClases());
+            model.addAttribute("horarios", horarioService.listarHorariosActivos());
+            return "clases/lista :: tablaClases";
+        }
+    }
+
+    @PostMapping("/{id}/eliminar")
+    public String eliminarClase(@PathVariable Long id, Model model) {
+        try {
+            claseService.eliminarClase(id);
+            model.addAttribute("clases", claseService.listarTodasClases());
+            model.addAttribute("horarios", horarioService.listarHorariosActivos());
+            model.addAttribute("mensaje", "Clase eliminada correctamente");
+            return "clases/lista :: tablaClases";
+        } catch (Exception e) {
+            log.error("Error al eliminar la clase: ", e);
+            model.addAttribute("error", "Error al eliminar la clase");
+            model.addAttribute("clases", claseService.listarTodasClases());
+            model.addAttribute("horarios", horarioService.listarHorariosActivos());
+            return "clases/lista :: tablaClases";
+        }
+    }
+
+    @PostMapping("/horario/agregar")
+    public String agregarHorario(@RequestParam String hora, Model model) {
+        try {
+            horarioService.agregarHorario(hora);
+            model.addAttribute("clases", claseService.listarTodasClases());
+            model.addAttribute("horarios", horarioService.listarHorariosActivos());
+            return "clases/lista :: tablaClases";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "clases/lista :: message";
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al agregar el horario");
+            return "clases/lista :: message";
+        }
+    }
+
+    @PostMapping("/horario/{id}/actualizar")
+    public String actualizarHorario(@PathVariable Long id, @RequestParam String hora, Model model) {
+        try {
+            horarioService.actualizarHorario(id, hora);
+            model.addAttribute("clases", claseService.listarTodasClases());
+            model.addAttribute("horarios", horarioService.listarHorariosActivos());
+            model.addAttribute("mensaje", "Horario actualizado correctamente");
+            return "clases/lista :: tablaClases";
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            model.addAttribute("error", e.getMessage());
+            return "clases/lista :: message";
+        } catch (Exception e) {
+            log.error("Error al actualizar el horario: ", e);
+            model.addAttribute("error", "Error al actualizar el horario");
+            return "clases/lista :: message";
+        }
+    }
+
+    @PostMapping("/horario/{id}/eliminar")
+    public String eliminarHorario(@PathVariable Long id, Model model) {
+        try {
+            horarioService.eliminarHorario(id);
+            model.addAttribute("clases", claseService.listarTodasClases());
+            model.addAttribute("horarios", horarioService.listarHorariosActivos());
+            model.addAttribute("mensaje", "Horario eliminado correctamente");
+            return "clases/lista :: tablaClases";
+        } catch (IllegalStateException e) {
+            model.addAttribute("error", e.getMessage());
+            return "clases/lista :: message";
+        } catch (Exception e) {
+            log.error("Error al eliminar el horario: ", e);
+            model.addAttribute("error", "Error al eliminar el horario");
+            return "clases/lista :: message";
+        }
     }
 }

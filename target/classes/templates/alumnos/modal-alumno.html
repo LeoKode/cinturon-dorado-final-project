@@ -23,11 +23,11 @@
                             <div class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}">Nombre Error</div>
                         </div>
                         
-                        <!-- Campo de Edad -->
+                        <!-- Campo de Fecha de Nacimiento -->
                         <div class="mb-3">
-                            <label class="form-label">Edad</label>
-                            <input type="number" class="form-control" th:field="*{edad}" required min="1" />
-                            <div class="text-danger" th:if="${#fields.hasErrors('edad')}" th:errors="*{edad}">Edad Error</div>
+                            <label class="form-label">Fecha Nacimiento</label>
+                            <input type="date" class="form-control" th:field="*{fechaNacimiento}" required min="1" />
+                            <div class="text-danger" th:if="${#fields.hasErrors('fechaNacimiento')}" th:errors="*{fechaNacimiento}">Edad Error</div>
                         </div>
                         
                         <!-- Campo de Email -->
@@ -35,6 +35,13 @@
                             <label class="form-label">Email</label>
                             <input type="email" class="form-control" th:field="*{email}" required />
                             <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email Error</div>
+                        </div>
+
+                        <!-- Campo de Telefono -->
+                        <div class="mb-3">
+                            <label class="form-label">Teléfono</label>
+                            <input type="text" class="form-control" th:field="*{telefono}" required />
+                            <div class="text-danger" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}">Teléfono Error</div>
                         </div>
                         
                         <!-- Campo de Nivel de Cinturón -->
@@ -48,6 +55,17 @@
                                 </option>
                             </select>
                             <div class="text-danger" th:if="${#fields.hasErrors('nivelCinturon')}" th:errors="*{nivelCinturon}">Nivel de Cinturón Error</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Categoría</label>
+                            <select class="form-select" th:field="*{categoria}" required>
+                                <option value="">Seleccione una categoría</option>
+                                <option th:each="cat : ${T(com.cinturondorado.model.enums.CategoriaAlumno).values()}"
+                                        th:value="${cat}" 
+                                        th:text="${cat}">
+                                </option>
+                            </select>
                         </div>
                         
                         <!-- Campo de Activo

@@ -9,20 +9,21 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="detallesExamenForm">
+                <form id="detallesExamenForm" th:data-id="${examen.id}">
                     <!-- Campo oculto para el ID -->
                     <!-- <input type="hidden" id="examenId" th:field="*{id?}" /> -->
 
                     <div class="card mb-3 shadow-sm">
                         <div class="card-body">
                             <h6 class="card-subtitle mb-3 text-primary fw-bold">
-                                <i class="fas fa-info-circle me-2">Información General</i>
+                                <i class="fas fa-info-circle me-2"></i>Información General
                             </h6>
                             <div class="row mb-3">
                                 <div class="col-sm-4">
                                     <label class="form-label text-muted">Alumno</label>
-                                    <input type="text" class="form-control" th:value="${examen?.alumno?.nombre}"
-                                        readonly />
+                                    <input type="text" class="form-control"
+                                        th:value="${examen?.alumno?.nombre + ' - ' + examen?.alumno?.categoria}"
+                                        readonly>
                                 </div>
                                 <div class="col-sm-4">
                                     <label class="form-label text-muted">Fecha</label>
@@ -38,17 +39,19 @@
                                                 (examen.estado.name() == 'PENDIENTE' ? 'bg-warning' : 'bg-danger'))}"
                                             th:text="${examen?.estado.name()}">
                                         </span>
-                                        <span th:unless="${examen?.estado != null}" class="badge rounded-pill bg-secondary">
+                                        <span th:unless="${examen?.estado != null}"
+                                            class="badge rounded-pill bg-secondary">
                                             N/A
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div th:if="${examen?.estado != null and examen?.estado.name() != 'PENDIENTE'}" class="card shadow-sm mt-4">
+                            <div th:if="${examen?.estado != null and examen?.estado.name() != 'PENDIENTE'}"
+                                class="card shadow-sm mt-4">
                                 <div class="card-body">
                                     <h6 class="card-subtitle mb-3 text-primary fw-bold">
-                                        <i class="fas fa-chart-bar me-2">Resultados</i>
+                                        <i class="fas fa-chart-bar me-2"></i>Resultados
                                     </h6>
                                     <div class="row mb-3">
                                         <div class="col-sm-6">
@@ -64,8 +67,14 @@
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label text-muted">Observaciones Generales</label>
-                                        <textarea class="form-control" rows="3"
+                                        <textarea class="form-control" id="observaciones" rows="3"
                                             th:text="${examen?.observaciones}">Sin observaciones</textarea>
+                                        <div class="mt-2">
+                                            <button type="button" class="btn btn-primary btn-sm"
+                                                onclick="guardarObservaciones()" th:title="'Guardar observaciones'">
+                                                <i class="fas fa-save mx-1"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -74,11 +83,14 @@
                 </form>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-danger" onclick="eliminarExamen()">
+                    <i class="fas fa-trash me-2"></i>Eliminar Examen
+                </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-2"></i>Cerrar
                 </button>
-                <button th:if="${examen?.estado != null and examen?.estado == 'APROBADO'}" type="button" class="btn btn-primary"
-                    onclick="imprimirCertificado()">
+                <button th:if="${examen?.estado != null and examen?.estado == 'APROBADO'}" type="button"
+                    class="btn btn-primary" onclick="imprimirCertificado()">
                     <i class="fas fa-print me-2"></i>Imprimir Certificado
                 </button>
             </div>

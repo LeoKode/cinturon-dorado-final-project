@@ -5,6 +5,8 @@ import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,7 +27,7 @@ public class Pago {
     @JoinColumn(name = "alumno_id", nullable = false)
     private Alumno alumno;
     
-    @Column(nullable = false)
+    @Column(name = "fecha", nullable = false, columnDefinition = "DATE")
     private LocalDate fecha;
     
     @Column(nullable = false)
@@ -37,6 +39,7 @@ public class Pago {
     @Column(nullable = false)
     private String concepto;
     
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EstadoPago estado;
     

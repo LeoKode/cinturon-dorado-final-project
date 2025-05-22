@@ -5,90 +5,123 @@
 
 <body>
     <nav th:replace="~{layout/base :: nav}"></nav>
-    <div class="container my-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Gestión de Exámenes</h2>
+    <div class="container my-5">
+        <div class="d-flex justify-content-between align-items-center m-4">
+            <h2 class="section-title">Gestión de Exámenes</h2>
             <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#nuevoExamenModal">
-                <i class="fas fa-plus me-1">Programar Examen</i>
+                <i class="fas fa-plus me-1"></i>Programar Examen
             </button>
         </div>
         <!-- Filtros -->
         <div class="card mb-4">
             <div class="card-body">
                 <form id="searchExamenesForm" class="row g-3">
-                    <div class="col-md-3">
-                        <select class="form-select" id="nivelActual" name="nivelActual">
-                            <option value="">Nivel Actual</option>
-                            <option th:each="nivel : ${nivelesCinturon}" th:value="${nivel}" th:text="${nivel}">
+                    <div class="col-md-2">
+                        <label class="col-form-label">Filtrar por estado</label>
+                        <select class="form-select" id="estado" name="estado">
+                            <option value="">Estado</option>
+                            <option th:each="estado : ${T(com.cinturondorado.model.enums.EstadoExamen).values()}"
+                                th:value="${estado}" th:text="${estado}">
                             </option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
+                        <label class="col-form-label">Filtrar por categoría</label>
+                        <select class="form-select" id="categoriaAlumno" name="categoriaAlumno">
+                            <option value="">Todas las categorías</option>
+                            <option value="ADULTOS">Adultos</option>
+                            <option value="MENORES">Menores</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="col-form-label">Filtrar por nivel aspirante</label>
                         <select class="form-select" id="nivelAspirante" name="nivelAspirante">
-                            <option value="">Nivel Aspirante</option>
-                            <option th:each="nivel : ${nivelesCinturon}" th:value="${nivel}" th:text="${nivel}">
+                            <option value="">Todos los niveles</option>
+                            <option th:each="nivel : ${nivelesCinturon}"
+                                th:if="${nivel != T(com.cinturondorado.model.enums.NivelCinturon).BLANCO}"
+                                th:value="${nivel}" th:text="${nivel}">
                             </option>
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <input type="date" class="form-control" id="fecha" name="fecha">
+                    <div class="col-md-2">
+                        <label class="col-form-label">Filtrar por año</label>
+                        <select class="form-select" id="yearExamen" name="year">
+                            <option value="">Todos los años</option>
+                            <option th:each="year : ${#numbers.sequence(2020, #calendars.year(#calendars.createNow()))}" 
+                                    th:value="${year}" 
+                                    th:text="${year}"
+                                    th:selected="${yearSeleccionado == year}">
+                            </option>
+                        </select>
                     </div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-secondary w-100">Buscar</button>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-secondary" onclick="reiniciarFiltros()">
+                            <i class="fas fa-sync-alt me-1"></i>Limpiar filtros
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
-        <!-- Tabla de exámenes -->
-        <div class="table-responsive">
+        <!-- Añadir contenedor para alertas -->
+        <div id="alertContainer" class="mb-3"></div>
+        <!-- Tabla de exámenes con el fragmento -->
+        <div id="tablaExamenes" th:fragment="tablaExamenes" class="table-responsive"
+            th:data-total-elements="${page.totalElements}" th:data-page-size="${page.size}"
+            th:data-current-page="${page.number}">
             <table class="table table-hover">
                 <thead class="table-light">
                     <tr>
-                        <th>Fecha</th>
+                        <th>ID</th>
                         <th>Alumno</th>
+                        <th>Categoría</th>
                         <th>Nivel Actual</th>
                         <th>Nivel Aspirante</th>
+                        <th>Fecha</th>
                         <th>Estado</th>
-                        <th>Evaluador</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <!-- ... rest of the file ... -->
                 <tbody>
                     <tr th:each="examen : ${examenes}">
-                        <td
-                            th:text="${examen?.fecha != null ? #temporals.format(examen.fecha, 'dd/MM/yyyy HH:mm') : ''}">
+                        <td th:text="${examen.id}"></td>
+                        <td th:text="${examen?.alumno?.nombre ?: 'N/A'}"></td>
+                        <td th:text="${examen.alumno.categoria}"></td>
+                        <td>
+                            <img th:if="${examen?.nivelActual != null}"
+                            th:src="@{'/images/cinturones/' + ${examen.nivelActual.toString().toLowerCase()} + '.png'}"
+                            class="cinturon-icon" th:alt="${examen.nivelActual}" />
+                            <span th:text="${examen?.nivelActual ?: 'N/A'}"></span>
+                        </td>
+                        <td>
+                            <img th:if="${examen?.nivelAspirante != null}"
+                            th:src="@{'/images/cinturones/' + ${examen.nivelAspirante.toString().toLowerCase()} + '.png'}"
+                            class="cinturon-icon" th:alt="${examen.nivelAspirante}" />
+                            <span th:text="${examen?.nivelAspirante ?: 'N/A'}"></span>
+                        </td>
+                        <td th:text="${examen?.fecha != null ? #temporals.format(examen.fecha, 'dd/MM/yyyy') : ''}">
                             01/01/2024
                         </td>
-                        <td th:text="${examen?.alumno?.nombre ?: 'N/A'}"></td>
-                        <td th:text="${examen?.nivelActual ?: 'N/A'}"></td>
-                        <td th:text="${examen?.nivelAspirante ?: 'N/A'}"></td>
                         <td>
-                            <span th:if="${examen != null and examen.estado != null}" th:class="${'badge ' + 
+                            <span th:if="${examen?.estado != null}" th:class="${'badge ' + 
                                     (examen.estado.name() == 'APROBADO' ? 'bg-success' : 
                                     (examen.estado.name() == 'PENDIENTE' ? 'bg-warning' : 'bg-danger'))}"
                                 th:text="${examen.estado.name()}">
                             </span>
-                            <span th:unless="${examen != null and examen.estado != null}"
-                                class="badge bg-secondary">N/A</span>
                         </td>
-                        <td th:text="${examen?.evaluador?.nombre ?: 'Sin asignar'}">Profesor</td>
                         <td>
                             <div class="btn-group">
-                                <button class="btn btn-sm btn-outline-primary"
-                                    th:if="${examen != null and examen.estado.name() == 'PENDIENTE'}"
-                                    th:onclick="'evaluarExamen(' + ${examen.id} + ')'">
-                                    <i class="fas fa-check-circle me-1">Evaluar</i>
+                                <button class="btn btn-sm btn-primary" th:if="${examen?.estado?.name() == 'PENDIENTE'}"
+                                    th:onclick="'evaluarExamen(' + ${examen.id} + ')'" th:title="Evaluar">
+                                    <i class="fas fa-check-circle mx-1"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-info"
-                                    th:onclick="'verDetallesExamen(' + ${examen.id} + ')'">
-                                    <i class="fas fa-eye me-1">Detalles</i>
+                                <button type="button" class="btn btn-sm btn-info"
+                                    th:onclick="'verDetallesExamen(' + ${examen.id} + ')'" th:title="'Ver detalles'">
+                                    <i class="fas fa-eye mx-1"></i>
                                 </button>
                             </div>
                         </td>
                     </tr>
                 </tbody>
-                <!-- ... rest of the file ... -->
             </table>
         </div>
     </div>

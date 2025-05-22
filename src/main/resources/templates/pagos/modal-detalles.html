@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalles del Pago</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div th:if="${pago}">
+                    <p><strong>ID:</strong> <span th:text="${pago.id}"></span></p>
+                    <p><strong>Alumno:</strong> <span th:text="${pago.alumno.nombre}"></span></p>
+                    <p><strong>Monto:</strong> <span th:text="${'$' + pago.monto}"></span></p>
+                    <p><strong>Fecha:</strong> <span th:text="${#temporals.format(pago.fecha, 'dd/MM/yyyy')}"></span></p>
+                    <p><strong>Estado:</strong> <span th:text="${pago.estado}"></span></p>
+                    <p><strong>Concepto:</strong> <span th:text="${pago.concepto}"></span></p>
+                </div>
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

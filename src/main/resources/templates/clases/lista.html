@@ -6,82 +6,90 @@
 <body>
     <nav th:replace="~{layout/base :: nav}"></nav>
 
-    <main class="container my-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Gestión de Clases</h2>
-            <div>
-                <button class="btn btn-success me-2" onclick="exportarCalendario()">
-                    <i class="fas fa-calendar-alt"></i> Exportar Calendario
-                </button>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevaClaseModal">
-                    Nueva Clase
-                </button>
-            </div>
+    <div th:fragment="message" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">Error message here</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <main class="container my-5">
+        <div class="d-flex justify-content-between align-items-center m-4">
+            <h2 class="section-title">Horarios de Clases</h2>
+            <button class="btn btn-primary" onclick="mostrarModalNuevoHorario()">
+                <i class="fas fa-plus me-1"></i>Añadir Horario
+            </button>
         </div>
 
-        <!-- Calendario y Filtros -->
-        <div class="row">
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Filtros</h5>
-
-                        <label class="form-label">Profesor</label>
-                        <select class="form-select" id="profesorFilter">
-                            <option value="">Todos</option>
-                            <option th:each="profesor : ${profesores}" th:value="${profesor.id}"
-                                th:text="${profesor.nombre}">
-                            </option>
-                        </select>
-                        <label class="form-label">Nivel</label>
-                        <select class="form-select" id="nivelFilter">
-                            <option value="">Todos</option>
-                            <option th:each="nivel : ${niveles}" th:value="${nivel}" th:text="${nivel}">
-                            </option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Add draggable events card -->
-                <div class="card mt-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Clases Disponibles</h5>
-                        <div id="external-events">
-                            <!-- Clases dinámicas -->
-                            <div th:each="clase : ${clases}" th:if="${clase.fechaHora == null}"
-                                class="d-flex align-items-center mb-2">
-                                <!-- Contenido arrastrable -->
-                                <div class="fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event flex-grow-1">
-                                    <div class="fc-event-main"
-                                        th:data-event="|{&quot;title&quot;:&quot;${clase.titulo}&quot;,&quot;duration&quot;:${clase.duracion}}|">
-                                        <span th:text="${clase.titulo}"></span>
-                                    </div>
-                                </div>
-                                <!-- Botón eliminar separado -->
-                                <form th:action="@{/clases/{id}/eliminar(id=${clase.id})}" method="post" class="ms-2">
-                                    <button type="submit" class="btn btn-link text-danger p-0 delete-btn"
-                                        onclick="return confirm('¿Está seguro de eliminar esta clase?')">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                            viewBox="0 0 24 24">
-                                            <path fill="currentColor"
-                                                d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z" />
-                                        </svg>
-                                    </button>
-                                </form>
+        <!-- Tabla de Horarios -->
+        <div class="table-responsive" th:fragment="tablaClases">
+            <table class="table table-bordered">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Horario</th>
+                        <th>Lunes</th>
+                        <th>Martes</th>
+                        <th>Miércoles</th>
+                        <th>Jueves</th>
+                        <th>Viernes</th>
+                        <th>Sábado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="horario : ${horarios}">
+                        <td class="fw-bold" 
+                            th:text="${horario.hora}" 
+                            th:data-horario-id="${horario.id}"
+                            onclick="mostrarModalNuevoHorario(this)">10:00</td>
+                        <td th:each="dia : ${#strings.arraySplit('LUNES,MARTES,MIERCOLES,JUEVES,VIERNES,SABADO', ',')}"
+                            th:attr="data-dia=${dia},data-hora=${horario.hora}" 
+                            onclick="mostrarModalClase(this)">
+                            <div th:each="clase : ${clases}" 
+                                 th:if="${clase.dia == dia and clase.horaInicio == horario.hora}">
+                                <span th:text="${clase.titulo}" 
+                                      th:attr="data-clase-id=${clase.id}"
+                                      class="badge bg-primary d-block mb-1">
+                                </span>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Calendario -->
-            <div class="col-md-9">
-                <div id="calendar" class="shadow-sm"></div>
-            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </main>
 
     <div th:replace="~{layout/base :: scripts}"></div>
     <div th:replace="~{clases/modal-clase :: modal}"></div>
+    <div th:replace="~{clases/modal-horario :: modal-horario}"></div>
+
+    <style>
+        .table td {
+            height: 80px;
+            vertical-align: middle;
+            min-width: 150px;
+            cursor: pointer;
+        }
+    
+        .table td:hover {
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+    
+        .table th {
+            text-align: center;
+            background-color: #0d6efd;
+            color: white;
+        }
+    
+        .table td:first-child {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            min-width: 120px;
+        }
+    
+        .badge {
+            width: 100%;
+            padding: 8px;
+            font-size: 0.9em;
+        }
+    </style>
 </body>
 
 </html>

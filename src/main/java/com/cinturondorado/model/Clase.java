@@ -1,23 +1,14 @@
 package com.cinturondorado.model;
 
-import java.time.LocalDateTime;
-import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.ColumnTransformer;
-
-import com.cinturondorado.model.enums.TipoClase;
 
 @Entity
 @Table(name = "clases")
@@ -29,21 +20,21 @@ public class Clase {
     /*@ManyToOne
     @JoinColumn(name = "profesor_id", nullable = false)
     private Profesor profesor;  */
+
     @Column(nullable = false)
     private String titulo;
+
+    @Column(name = "dia_semana")
+    private String dia;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "horario_id", nullable = false)
+    private HorarioDisponible horario;
     
-    @Column(nullable = false)
-    private int duracion; // duracion en minutos
-    
-    @Column
-    private LocalDateTime fechaHora;
-    
-    @Enumerated(EnumType.STRING)
-    @ColumnTransformer(write = "?::tipo_clase_enum")
-    private TipoClase tipo;
-    
-    // @ManyToMany(mappedBy = "clases")
-    // private Set<Alumno> alumnos;
+    @ManyToOne
+    @JoinColumn(name = "alumno_id")
+    private Alumno alumno;
+
     
     // Getters
     public Long getId() {
@@ -58,21 +49,22 @@ public class Clase {
         return titulo;
     }
 
-    public int getDuracion() {
-        return duracion;
+    public String getHoraInicio() {
+        return horario != null ? horario.getHora() : null;
+    }
+
+    public String getDia() {
+        return dia;
+    }
+
+    public HorarioDisponible getHorario() {
+        return horario;
     }
     
-    public LocalDateTime getFechaHora() {
-        return fechaHora;
+    public Alumno getAlumno() {
+        return alumno;
     }
-    
-    public TipoClase getTipo() {
-        return tipo;
-    }
-    
-    // public Set<Alumno> getAlumnos() {
-    //     return alumnos;
-    // }
+
     
     // Setters
     public void setId(Long id) {
@@ -87,19 +79,15 @@ public class Clase {
         this.titulo = titulo;
     }
 
-    public void setDuracion(int duracion) {
-        this.duracion = duracion;
+    public void setDia(String dia) {
+        this.dia = dia;
+    }
+
+    public void setHorario(HorarioDisponible horario) {
+        this.horario = horario;
     }
     
-    public void setFechaHora(LocalDateTime fechaHora) {
-        this.fechaHora = fechaHora;
+    public void setAlumno(Alumno alumno) {
+        this.alumno = alumno;
     }
-    
-    public void setTipo(TipoClase tipo) {
-        this.tipo = tipo;
-    }
-    
-    // public void setAlumnos(Set<Alumno> alumnos) {
-    //     this.alumnos = alumnos;
-    // }
 } 

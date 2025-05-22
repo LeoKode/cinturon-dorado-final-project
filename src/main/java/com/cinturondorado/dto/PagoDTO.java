@@ -4,6 +4,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.cinturondorado.model.enums.EstadoPago;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,7 +26,11 @@ public class PagoDTO {
     @Positive(message = "El monto debe ser positivo")
     private BigDecimal monto;
     
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate fecha;
+
+    private EstadoPago estado;
+
     private String concepto;
 
     public LocalDate getFecha() {

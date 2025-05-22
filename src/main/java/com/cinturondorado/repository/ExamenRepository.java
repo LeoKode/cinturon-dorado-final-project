@@ -3,12 +3,15 @@ package com.cinturondorado.repository;
 import com.cinturondorado.model.Examen;
 import com.cinturondorado.model.enums.NivelCinturon;
 import com.cinturondorado.model.enums.EstadoExamen;
+import com.cinturondorado.model.enums.CategoriaAlumno;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -18,6 +21,7 @@ public interface ExamenRepository extends JpaRepository<Examen, Long> {
     List<Examen> findByNivelActual(NivelCinturon nivelActual);
     List<Examen> findByNivelAspirante(NivelCinturon nivelAspirante);
     List<Examen> findByNivelActualAndNivelAspirante(NivelCinturon nivelActual, NivelCinturon nivelAspirante);
+    long countByFechaGreaterThanEqualAndEstado(LocalDate fecha, EstadoExamen estado);
 
     // Búsquedas por estado
     List<Examen> findByEstado(EstadoExamen estado);
@@ -31,7 +35,7 @@ public interface ExamenRepository extends JpaRepository<Examen, Long> {
     List<Examen> findByEvaluadorId(@Param("evaluadorId") Long evaluadorId);
 
     // Búsqueda por fecha
-    List<Examen> findByFechaBetween(LocalDateTime fechaInicio, LocalDateTime fechaFin);
+    Page<Examen> findByFechaBetween(LocalDate fechaInicio, LocalDate fechaFin, Pageable pageable);
 
     // Búsqueda combinada
     @Query("SELECT e FROM Examen e WHERE " +
@@ -43,4 +47,62 @@ public interface ExamenRepository extends JpaRepository<Examen, Long> {
         @Param("nivelAspirante") NivelCinturon nivelAspirante,
         @Param("estado") EstadoExamen estado
     );
+
+    @Query("SELECT e FROM Examen e WHERE e.fecha BETWEEN :fechaDesde AND :fechaHasta")
+    Page<Examen> findByFechaRange(
+        @Param("fechaDesde") LocalDate fechaDesde,
+        @Param("fechaHasta") LocalDate fechaHasta,
+        Pageable pageable
+    );
+
+    Page<Examen> findByNivelAspirante(NivelCinturon nivelAspirante, Pageable pageable);
+    Page<Examen> findByEstado(EstadoExamen estado, Pageable pageable);
+    Page<Examen> findByNivelAspiranteAndEstado(NivelCinturon nivelAspirante, EstadoExamen estado, Pageable pageable);
+
+    @Query("SELECT e FROM Examen e WHERE " +
+           "(:categoria IS NULL OR e.alumno.categoria = :categoria) AND " +
+           "(:nivelAspirante IS NULL OR e.nivelAspirante = :nivelAspirante) AND " +
+           "(:estado IS NULL OR e.estado = :estado)")
+    Page<Examen> findByAlumnoCategoriaAndFilters(
+        @Param("categoria") CategoriaAlumno categoria,
+        @Param("nivelAspirante") NivelCinturon nivelAspirante,
+        @Param("estado") EstadoExamen estado,
+        Pageable pageable);
+
+    @Query("SELECT e FROM Examen e WHERE " +
+           "(:categoria IS NULL OR e.alumno.categoria = :categoria) AND " +
+           "(:nivelAspirante IS NULL OR e.nivelAspirante = :nivelAspirante) AND " +
+           "(:estado IS NULL OR e.estado = :estado) AND " +
+           "e.fecha >= :startDate AND e.fecha <= :endDate")
+    Page<Examen> findByFiltersAndYear(
+        @Param("categoria") CategoriaAlumno categoria,
+        @Param("nivelAspirante") NivelCinturon nivelAspirante,
+        @Param("estado") EstadoExamen estado,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate,
+        Pageable pageable);
+
+    @Query("SELECT e FROM Examen e WHERE " +
+           "(:nivelAspirante IS NULL OR e.nivelAspirante = :nivelAspirante) AND " +
+           "(:estado IS NULL OR e.estado = :estado) AND " +
+           "e.fecha BETWEEN :fechaInicio AND :fechaFin")
+    Page<Examen> findByFiltersAndDateRange(
+        @Param("nivelAspirante") NivelCinturon nivelAspirante,
+        @Param("estado") EstadoExamen estado,
+        @Param("fechaInicio") LocalDate fechaInicio,
+        @Param("fechaFin") LocalDate fechaFin,
+        Pageable pageable);
+
+    @Query("SELECT e FROM Examen e WHERE " +
+           "(:categoria IS NULL OR e.alumno.categoria = :categoria) AND " +
+           "(:nivelAspirante IS NULL OR e.nivelAspirante = :nivelAspirante) AND " +
+           "(:estado IS NULL OR e.estado = :estado) AND " +
+           "e.fecha BETWEEN :fechaInicio AND :fechaFin")
+    Page<Examen> findByAllFilters(
+        @Param("categoria") CategoriaAlumno categoria,
+        @Param("nivelAspirante") NivelCinturon nivelAspirante,
+        @Param("estado") EstadoExamen estado,
+        @Param("fechaInicio") LocalDate fechaInicio,
+        @Param("fechaFin") LocalDate fechaFin,
+        Pageable pageable);
 }

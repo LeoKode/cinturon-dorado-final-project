@@ -1,300 +1,276 @@
 document.addEventListener('DOMContentLoaded', function () {
-    initializeCalendar();
-    initializeFilters();
-});
+    const claseForm = document.getElementById('claseForm');
+    const btnEliminar = document.getElementById('btnEliminar');
 
-function initializeCalendar() {
-    var Calendar = FullCalendar.Calendar;
-    var Draggable = FullCalendar.Draggable;
+    if (claseForm) {
+        claseForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            guardarClase(this);
+        });
+    }
 
-    var containerEl = document.getElementById('external-events');
-    var calendarEl = document.getElementById('calendar');
-    if (!calendarEl || !containerEl) return;
-
-  // Initialize draggable events
-  new Draggable(containerEl, {
-    itemSelector: '.fc-event',
-    eventData: function(eventEl) {
-        const mainEl = eventEl.querySelector('.fc-event-main');
-        const dataStr = mainEl.getAttribute('data-event');
-        const data = JSON.parse(dataStr);
-        console.log('Dragged event data:', data); // Debug
-        
-        return {
-            title: data.title,
-            duration: parseInt(data.duration),
-            extendedProps: {
-                duration: parseInt(data.duration)
+    if (btnEliminar) {
+        btnEliminar.addEventListener('click', function() {
+            const claseId = document.getElementById('claseId').value;
+            if (claseId && confirm('¿Estás seguro de eliminar esta clase?')) {
+                eliminarClase(claseId);
             }
-        };
+        });
     }
 });
-    // Initialize calendar
-    var calendar = new Calendar(calendarEl, {
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        editable: true,
-        droppable: true,
-        events: '/clases/api/clases',
-        eventClick: function(info) {
-            if (confirm('¿Estás seguro de eliminar esta clase?')) {
-                eliminarClase(info.event.id);
-            }
-        },
-        eventReceive: function(info) {
-            guardarClaseArrastrada(info.event);
-        },
-        eventDrop: function(info) {
-            const id = info.event.id;
-            const nuevaFecha = info.event.start;
-            if (id) {
-                actualizarFechaClase(id, nuevaFecha, info);
-            }
-        }
-    });
 
-    calendar.render();
+function mostrarModalClase(celda) {
+    const dia = celda.dataset.dia;
+    const horarioId = celda.closest('tr').querySelector('.fw-bold').dataset.horarioId;
+    
+    // Obtener la clase existente si hay una
+    const claseExistente = celda.querySelector('.badge');
+    
+    // Get modal and form elements
+    const modal = new bootstrap.Modal(document.getElementById('claseModal'));
+    const form = document.getElementById('claseForm');
+    const claseIdInput = document.getElementById('claseId');
+    const diaInput = document.getElementById('diaClase');
+    const horarioInput = document.getElementById('horarioId');
+    const tituloInput = document.getElementById('titulo');
+    const btnEliminar = document.getElementById('btnEliminar');
+    
+    if (form) {
+        // Reset form
+        form.reset();
+        
+        // Set initial values
+        diaInput.value = dia;
+        horarioInput.value = horarioId; // Establecer el ID del horario
+        
+        // Si hay una clase existente, cargar sus datos
+        if (claseExistente) {
+            const claseId = claseExistente.getAttribute('data-clase-id');
+            claseIdInput.value = claseId;
+            tituloInput.value = claseExistente.textContent.trim();
+            btnEliminar.style.display = 'block';
+        } else {
+            claseIdInput.value = '';
+            btnEliminar.style.display = 'none';
+        }
+        
+        // Update modal title
+        const modalTitle = document.querySelector('#claseModal .modal-title');
+        if (modalTitle) {
+            modalTitle.textContent = claseExistente ? 
+                `Editar Clase - ${dia}` : 
+                `Nueva Clase - ${dia}`;
+        }
+        
+        modal.show();
+    }
 }
 
-function actualizarFechaClase(id, fecha, info) {
-    if (!id || !fecha) return;
-
-    // Ajustar la zona horaria
-    const offset = fecha.getTimezoneOffset();
-    fecha.setMinutes(fecha.getMinutes() - offset);
-
-    const fechaHora = fecha.toISOString().slice(0, 19);
+// Función para mostrar el modal de nuevo horario
+function mostrarModalNuevoHorario(horaCell) {
+    const modal = new bootstrap.Modal(document.getElementById('nuevoHorarioModal'));
+    const form = document.getElementById('horarioForm');
+    const horarioInput = document.getElementById('nuevoHorario');
+    const btnEliminar = document.getElementById('btnEliminarHorario');
     
-    fetch(`/clases/${id}/actualizar-fecha`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ fechaHora: fechaHora })
-    })
-    .then(response => {
-        if (!response.ok) {
-            info.revert();
-            throw new Error('Error al actualizar la fecha');
-        }
-        return response.json();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al actualizar la fecha de la clase');
-        info.revert();
-    });
+    form.reset();
+    
+    if (horaCell) {
+        // Modo edición
+        const hora = horaCell.textContent;
+        const horarioId = horaCell.getAttribute('data-horario-id');
+        horarioInput.value = hora;
+        document.getElementById('horarioId').value = horarioId;
+        btnEliminar.style.display = 'block';
+        btnEliminar.onclick = () => eliminarHorario(horarioId);
+    } else {
+        // Modo nuevo horario
+        btnEliminar.style.display = 'none';
+        document.getElementById('horarioId').value = '';
+    }
+    
+    modal.show();
 }
 
-function agregarClaseDisponible() {
-    const titulo = document.getElementById('titulo').value;
-    const duracion = document.getElementById('duracion').value;
+// Función para agregar el nuevo horario
+function agregarNuevoHorario() {
+    const horarioInput = document.getElementById('nuevoHorario');
+    const nuevoHorario = horarioInput.value;
+    const horarioId = document.getElementById('horarioId').value;
     
-    if (!titulo || !duracion) {
-        alert('Por favor complete todos los campos');
+    if (!nuevoHorario) {
+        mostrarError('Debe seleccionar una hora válida');
         return;
     }
 
-    const formData = new FormData();
-    formData.append('titulo', titulo);
-    formData.append('duracion', duracion);
-    formData.append('tipo', titulo.toLowerCase().includes('infantil') ? 'PRINCIPIANTE' : 'AVANZADO');
+    // Determinar si es una actualización o nuevo horario
+    const url = horarioId ? 
+        `/clases/horario/${horarioId}/actualizar` : 
+        '/clases/horario/agregar';
 
-    fetch('/clases/plantilla', {
+    fetch(url, {
         method: 'POST',
-        body: formData
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `hora=${nuevoHorario}`
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error al guardar la clase');
+    .then(response => response.text())
+    .then(html => {
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = html;
+        
+        if (html.includes('error')) {
+            const errorMessage = tempContainer.querySelector('.alert-danger')?.textContent;
+            mostrarError(errorMessage || 'Error al procesar el horario');
+        } else {
+            const tablaClases = document.querySelector('.table-responsive');
+            if (tablaClases) {
+                tablaClases.innerHTML = tempContainer.querySelector('.table-responsive').innerHTML;
+            }
+            bootstrap.Modal.getInstance(document.getElementById('nuevoHorarioModal')).hide();
+            mostrarMensaje(
+                horarioId ? 'Horario actualizado correctamente' : 'Horario agregado correctamente', 
+                'success'
+            );
         }
-        return response.json();
-    })
-    .then(data => {
-        // Crear el elemento visual
-        const nuevoEvento = document.createElement('div');
-        nuevoEvento.className = 'fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event';
-        
-        const eventoMain = document.createElement('div');
-        eventoMain.className = 'fc-event-main';
-        eventoMain.setAttribute('data-event', JSON.stringify({
-            title: titulo,
-            duration: duracion // Guardar la duración directamente como número        
-            }));
-        eventoMain.textContent = titulo;
-        
-        nuevoEvento.appendChild(eventoMain);
-        
-        // Añadir al contenedor y hacer draggable
-        const container = document.getElementById('external-events');
-        if (container) {
-            container.appendChild(nuevoEvento);
-            new FullCalendar.Draggable(nuevoEvento, {
-                eventData: function(eventEl) {
-                    const dataEvent = eventEl.querySelector('.fc-event-main').getAttribute('data-event');
-                    return JSON.parse(dataEvent);
-                }
-            });
-        }
-
-        // Cerrar el modal y limpiar el formulario
-        const modal = bootstrap.Modal.getInstance(document.getElementById('nuevaClaseModal'));
-        modal.hide();
-        document.getElementById('claseForm').reset();
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error al guardar la clase');
+        mostrarError('Error al procesar el horario');
     });
 }
 
-function guardarClase() {
-    // For form submission
-    const form = document.getElementById('claseForm');
-    form.submit();
+function guardarClase(form) {
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form)
+    })
+    .then(response => response.text())
+    .then(html => {
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = html;
+        
+        const tablaClases = document.querySelector('.table-responsive');
+        if (tablaClases) {
+            tablaClases.innerHTML = tempContainer.querySelector('.table-responsive').innerHTML;
+        }
+        
+        // Verificar si hay mensaje de error
+        const errorElement = tempContainer.querySelector('.alert-danger');
+        if (errorElement) {
+            mostrarError(errorElement.textContent);
+        } else {
+            // Cerrar el modal y mostrar mensaje de éxito
+            bootstrap.Modal.getInstance(document.getElementById('claseModal')).hide();
+            mostrarMensaje('Clase guardada correctamente', 'success');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarError('Error al guardar la clase');
+    });
 }
 
 function eliminarClase(id) {
-    if (!id) {
-        console.error('ID de clase no proporcionado');
-        return;
-    }
-
     fetch(`/clases/${id}/eliminar`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        credentials: 'same-origin'
+        method: 'POST'
     })
-        .then(response => {
-            if (response.ok) {
-                location.reload();
-            } else {
-                throw new Error('Error al eliminar la clase');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al eliminar la clase');
-        });
-}
-
-
-
-function guardarClaseArrastrada(event) {
-    // Crear elemento modal
-    const modalDiv = document.createElement('div');
-    modalDiv.className = 'modal fade';
-    modalDiv.id = 'timeSelectModal';
-    modalDiv.setAttribute('tabindex', '-1');
-    modalDiv.innerHTML = `
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Seleccionar Hora</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="timeInput" class="form-label">Hora de la clase</label>
-                        <input type="time" class="form-control" id="timeInput" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="confirmarGuardarClase(event)">Guardar</button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Añadir modal al DOM
-    document.body.appendChild(modalDiv);
-    
-    // Crear e inicializar el modal
-    const timeModal = new bootstrap.Modal(modalDiv);
-    
-    // Mostrar modal
-    timeModal.show();
-    
-    // Guardar referencia al evento
-    window.tempEvent = event;
-    
-    // Limpiar modal cuando se cierre
-    modalDiv.addEventListener('hidden.bs.modal', function() {
-        document.body.removeChild(modalDiv);
+    .then(response => response.text())
+    .then(html => {
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = html;
+        
+        const tablaClases = document.querySelector('.table-responsive');
+        if (tablaClases) {
+            tablaClases.innerHTML = tempContainer.querySelector('.table-responsive').innerHTML;
+        }
+        
+        // Cerrar el modal y mostrar mensaje
+        bootstrap.Modal.getInstance(document.getElementById('claseModal')).hide();
+        mostrarMensaje('Clase eliminada correctamente', 'success');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarError('Error al eliminar la clase');
     });
 }
 
-function confirmarGuardarClase(event) {
-    const timeInput = document.getElementById('timeInput');
-    const selectedTime = timeInput.value;
-    
-    if (!selectedTime) {
-        alert('Por favor seleccione una hora');
+function eliminarHorario(id) {
+    if (!confirm('¿Está seguro de eliminar este horario? Esta acción no se puede deshacer una vez confirmada.')) {
         return;
     }
 
-    // Obtener la fecha del evento
-    const fecha = new Date(window.tempEvent.startStr);
-    const [hours, minutes] = selectedTime.split(':');
-    
-    // Ajustar la hora considerando la zona horaria
-    const offset = fecha.getTimezoneOffset();
-    fecha.setHours(parseInt(hours), parseInt(minutes));
-    fecha.setMinutes(fecha.getMinutes() - offset); // Compensar la diferencia horaria
-    
-    const fechaHora = fecha.toISOString().slice(0, 19);
-
-    // Resto del código igual...
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/clases';
-
-    try {
-        const eventData = window.tempEvent._def?.extendedProps;
-        const duration = eventData?.duration;
+    fetch(`/clases/horario/${id}/eliminar`, {
+        method: 'POST'
+    })
+    .then(response => response.text())
+    .then(html => {
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = html;
         
-        console.log('Event data:', window.tempEvent._def);
-        console.log('Extended props:', eventData);
-        console.log('Duration from event:', duration);
-    
-        if (!duration) {
-            throw new Error('Duration not found in event data');
+        // Buscar mensaje de error
+        const errorElement = tempContainer.querySelector('.alert-danger');
+        if (errorElement) {
+            // Si hay error, mostrar el mensaje
+            mostrarError(errorElement.textContent.trim());
+            // Cerrar el modal
+            bootstrap.Modal.getInstance(document.getElementById('nuevoHorarioModal'))?.hide();
+        } else {
+            // Si no hay error, actualizar la tabla y mostrar mensaje de éxito
+            const tablaClases = document.querySelector('.table-responsive');
+            if (tablaClases) {
+                tablaClases.innerHTML = tempContainer.querySelector('.table-responsive').innerHTML;
+            }
+            bootstrap.Modal.getInstance(document.getElementById('nuevoHorarioModal')).hide();
+            mostrarMensaje('Horario eliminado correctamente', 'success');
         }
-    
-        const datos = {
-            'tipo': window.tempEvent.title?.toLowerCase().includes('infantil') ? 'PRINCIPIANTE' : 'AVANZADO',
-            'fechaHora': fechaHora,
-            'titulo': window.tempEvent.title,
-            'duracion': parseInt(duration)
-        };
-
-        Object.entries(datos).forEach(([key, value]) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = value;
-            form.appendChild(input);
-        });
-
-        document.body.appendChild(form);
-        form.submit();
-    } catch (e) {
-        console.error('Error procesando evento:', e);
-        alert('Error al guardar la clase en el calendario');
-    }
-
-    // Cerrar modal
-    const modal = bootstrap.Modal.getInstance(document.querySelector('.modal'));
-    modal.hide();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarError('Error al eliminar el horario');
+    });
 }
 
-function exportarCalendario() {
-    window.location.href = '/api/clases/exportar';
-} 
+// Función para mostrar mensajes de error
+function mostrarError(mensaje) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+    alertDiv.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" onclick="this.parentElement.remove()"></button>
+    `;
+    document.querySelector('main').insertAdjacentElement('afterbegin', alertDiv);
+    
+    // Auto-ocultar después de 5 segundos con animación
+    setTimeout(() => {
+        alertDiv.classList.remove('show');
+        alertDiv.classList.add('fade');
+        setTimeout(() => {
+            if (alertDiv && alertDiv.parentElement) {
+                alertDiv.remove();
+            }
+        }, 150); // Tiempo de la animación de fade
+    }, 5000);
+}
+
+function mostrarMensaje(mensaje, tipo = 'success') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" onclick="this.parentElement.remove()"></button>
+    `;
+    document.querySelector('main').insertAdjacentElement('afterbegin', alertDiv);
+    
+    // Auto-ocultar después de 3 segundos con animación
+    setTimeout(() => {
+        alertDiv.classList.remove('show');
+        alertDiv.classList.add('fade');
+        setTimeout(() => {
+            if (alertDiv && alertDiv.parentElement) {
+                alertDiv.remove();
+            }
+        }, 150); // Tiempo de la animación de fade
+    }, 3000);
+}

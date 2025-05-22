@@ -1,28 +1,383 @@
+/* Importar fuentes de Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 /* Estilos personalizados */
 /* Main Layout */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f7fa;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+    background-color: #f2f3f4 ;
 }
 
 .container-fluid {
     padding: 20px;
 }
 
+/* Navbar Styles */
+.navbar {
+    padding: 1rem 0;
+    background: linear-gradient(135deg, #0d6efd 0%, #4b6cb7 100%) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-bottom: 2px solid #0a58ca;
+}
+
+/* Ajustes tipográficos específicos */
+.section-title {
+    font-size: 2.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.navbar-brand {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.navbar-brand:hover {
+    transform: translateY(-1px);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.nav-item {
+    margin: 0 0.25rem;
+}
+
+.nav-link {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.navbar-toggler {
+    border: none;
+    padding: 0.5rem;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.navbar-toggler-icon {
+    width: 1.5em;
+    height: 1.5em;
+}
+
+/* Navbar link active state */
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+    font-weight: 600;
+}
+
+/* Estilos para títulos de sección */
+.section-title {
+    font-size: 2.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    position: relative;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 4px;
+    width: 60px;
+    background: linear-gradient(to right, #0d6efd, #4b6cb7);
+    border-radius: 2px;
+}
+
+/* Hero section */
+.display-4 {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #2c3e50, #3498db);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.lead {
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: #64748b;
+    max-width: 800px;
+    margin: 1.5rem auto;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    padding: 0 1rem;
+    position: relative;
+    text-align: center;
+}
+
+.lead::after {
+    content: '';
+    position: absolute;
+    bottom: -1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(to right, #0d6efd, #4b6cb7);
+    border-radius: 2px;
+    opacity: 0.7;
+}
+
+/* Button Styles */
+.btn {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+.btn-group {
+    gap: 0.5rem; /* Espacio entre botones en un grupo */
+}
+
+.btn-group .btn {
+    margin: 0.25rem;
+    border-radius: 6px !important;
+}
+
+/* Estilos mejorados para botones de acceso rápido */
+.btn-outline-primary,
+.btn-outline-success,
+.btn-outline-warning,
+.btn-outline-info {
+    padding: 1rem 2rem;
+    font-weight: 600;
+    border-width: 2px;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.5px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Efectos hover mejorados */
+.btn-outline-primary:hover,
+.btn-outline-success:hover,
+.btn-outline-warning:hover,
+.btn-outline-info:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+/* Hover effects para botones en tablas */
+.btn-group .btn:hover,
+.table .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilos específicos para botones pequeños */
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+}
+
+/* Asegurar que los iconos mantengan el alineamiento */
+.btn i {
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Estilos específicos para cada botón */
+.btn-outline-primary {
+    border-color: #0d6efd;
+    color: #0d6efd;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(135deg, #0d6efd, #4b6cb7);
+    border-color: transparent;
+}
+
+.btn-outline-success {
+    border-color: #198754;
+    color: #198754;
+}
+
+.btn-outline-success:hover {
+    background: linear-gradient(135deg, #198754, #0f5132);
+    border-color: transparent;
+}
+
+.btn-outline-warning {
+    border-color: #ffc107;
+    color: #ffc107;
+}
+
+.btn-outline-warning:hover {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    border-color: transparent;
+}
+
+.btn-outline-info {
+    border-color: #0dcaf0;
+    color: #0dcaf0;
+}
+
+.btn-outline-info:hover {
+    background: linear-gradient(135deg, #0dcaf0, #0096c7);
+    border-color: transparent;
+}
+
+/* Estilos para los iconos */
+.btn-outline-primary i,
+.btn-outline-success i,
+.btn-outline-warning i,
+.btn-outline-info i {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+/* Efecto hover en los iconos */
+.btn-outline-primary:hover i,
+.btn-outline-success:hover i,
+.btn-outline-warning:hover i,
+.btn-outline-info:hover i {
+    transform: scale(1.1);
+}
+
 /* Card Styles */
 .card {
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 1rem;
+    transition: all 0.25s ease-in-out;
+}
+
+.card:hover {
+    transform: none; /* Eliminar cualquier transformación */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07); /* Mantener solo el efecto de sombra */
 }
 
 .card-body {
     padding: 1.25rem;
 }
 
-.card:hover {
-    transform: translateY(-5px);
+/* Estilos modernos para las cards del dashboard */
+.hover-card {
+    overflow: hidden;
+    transition: all 0.25s ease-in-out;
+}
+
+.hover-card:hover {
+    transform: none; /* Eliminar la escala */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Código base para el pseudoelemento */
+.hover-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+/* Línea inferior específica para cada tipo de tarjeta según su clase */
+.card.bg-primary::after,
+.hover-card.bg-primary::after {
+    background: linear-gradient(90deg, #0d6efd, #4b6cb7);
+}
+
+.card.bg-success::after,
+.hover-card.bg-success::after {
+    background: linear-gradient(90deg, #198754, #0f5132);
+}
+
+.card.bg-warning::after,
+.hover-card.bg-warning::after {
+    background: linear-gradient(90deg, #ffc107, #fd7e14);
+}
+
+.card.bg-info::after,
+.hover-card.bg-info::after {
+    background: linear-gradient(90deg, #0dcaf0, #0096c7);
+}
+
+/* Efecto hover para mostrar la línea */
+.card:hover::after,
+.hover-card:hover::after {
+    transform: scaleX(1);
+}
+
+.hover-card .card-body {
+    z-index: 2;
+    padding: 2rem 1.5rem;
+}
+
+.hover-card .fas {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.9;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.hover-card .card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.hover-card .display-6 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin: 0.5rem 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.hover-card .btn-light {
+    background: rgba(255,255,255,0.9);
+    border: none;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.hover-card .btn-light:hover {
+    background: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Gradientes específicos para cada card */
+.card.bg-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #4b6cb7 100%) !important;
+}
+
+.card.bg-success {
+    background: linear-gradient(135deg, #198754 0%, #0f5132 100%) !important;
+}
+
+.card.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+}
+
+.card.bg-info {
+    background: linear-gradient(135deg, #0dcaf0 0%, #0096c7 100%) !important;
 }
 
 .display-6 {
@@ -190,6 +545,11 @@ body {
 }
 
 /* Modal Styles */
+.modal-title {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
 .modal-content {
     border-radius: 8px;
     border: none;
@@ -209,6 +569,23 @@ body {
     padding: 1rem 1.5rem;
 }
 
+.cinturon-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.form-select option {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+}
+
+.form-select option img {
+    margin-right: 8px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .card {
@@ -222,5 +599,156 @@ body {
     
     .fc-event .fc-event-main {
         padding: 0.5rem !important;
+    }
+
+    .lead {
+        font-size: 1.2rem;
+        margin: 1rem auto;
+    }
+}
+
+/* Estilos para las filas de descripción expandibles */
+.description-row {
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+}
+
+.description-row td {
+    padding: 0;
+}
+
+.description-row div {
+    transform: translateY(-10px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    max-height: 0;
+}
+
+.description-row.show div {
+    transform: translateY(0);
+    opacity: 1;
+    max-height: 500px;
+    margin: 0.5rem 0;
+}
+
+.btn-outline-info:focus {
+    box-shadow: none;
+}
+
+.description-row .p-3 {
+    background-color: #f8f9fa;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+    border-left: 3px solid #0d6efd !important;
+    margin: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+/* Añadir animación para la aparición de la descripción */
+.description-row.show .p-3 {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Resaltar la fila cuando su descripción está expandida */
+.item-row.active {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.item-row.active td {
+    border-bottom-color: rgba(13, 110, 253, 0.2);
+}
+
+.has-description {
+    border-color: #0dcaf0;
+    position: relative;
+}
+
+.has-description .badge {
+    font-size: 0.6rem;
+    padding: 0.25rem;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+}
+
+/* Estilos para filas clickeables */
+.item-row {
+    transition: background-color 0.2s ease;
+}
+
+.item-row:hover {
+    background-color: rgba(13, 110, 253, 0.02);
+}
+
+.item-row.active {
+    background-color: rgba(13, 110, 253, 0.05);
+    border-left: 3px solid #0d6efd;
+}
+
+/* Indicador de que la fila tiene descripción */
+.item-row[data-has-description="true"] {
+    position: relative;
+}
+
+.item-row[data-has-description="true"]::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 12px 12px 0;
+    border-color: transparent #0dcaf0 transparent transparent;
+}
+
+/* Estilo para la descripción expandible */
+.description-row div.p-3 {
+    background-color: #f8f9fa;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+    border-left: 3px solid #0d6efd !important;
+    margin: 0.5rem 1rem;
+    border-radius: 6px;
+}
+
+/* Estilos para alumnos activos/inactivos */
+.alumno-row {
+    transition: all 0.3s ease;
+}
+
+.alumno-inactivo {
+    opacity: 0.6;
+    background-color: #f8f9fa;
+}
+
+.alumno-inactivo td {
+    color: #6c757d;
+}
+
+/* Estilos para el botón de toggle */
+.btn-toggle-activo {
+    transition: all 0.3s ease;
+}
+
+.btn-toggle-activo:hover {
+    transform: scale(1.1);
+}
+
+/* Animación al cambiar estado */
+.fade-transition {
+    animation: fadeEffect 0.5s ease;
+}
+
+@keyframes fadeEffect {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
     }
 }

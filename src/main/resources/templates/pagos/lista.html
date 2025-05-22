@@ -1,51 +1,71 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{layout/base :: head}"></head>
+
 <body>
     <nav th:replace="~{layout/base :: nav}"></nav>
-    
-    <main class="container my-4">
+
+    <main class="container my-5">
         <div th:fragment="content">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Gestión de Pagos</h2>
+            <div class="d-flex justify-content-between align-items-center m-4">
+                <h2 class="section-title">Gestión de Pagos</h2>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoPagoModal">
-                    Registrar Pago
+                    <i class="fas fa-plus me-1"></i>Registrar Pago
                 </button>
             </div>
 
             <!-- Filtros -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <form id="searchPagosForm" class="row g-3">
+                    <form id="searchPagosForm" class="row g-3 align-items-end">
                         <div class="col-md-3">
-                            <select class="form-select" id="alumnoSelect" name="alumnoId">
-                                <option value="">Seleccionar Alumno</option>
-                                <option th:each="alumno : ${alumnos}"
-                                        th:value="${alumno.id}"
-                                        th:text="${alumno.nombre}">
-                                </option>
-                            </select>
+                            <label class="col-form-label">Buscar por nombre</label>
+                            <input type="text" class="form-control" id="alumnoSearch" name="alumnoNombre"
+                                placeholder="Buscar alumno..." list="alumnosList">
+                            <datalist id="alumnosList">
+                                <option th:each="alumno : ${alumnos}" th:value="${alumno.nombre}"
+                                    th:data-id="${alumno.id}">
+                            </datalist>
                         </div>
                         <div class="col-md-3">
+                            <label class="col-form-label">Filtrar por estado</label>
                             <select class="form-select" id="estadoSelect" name="estado">
                                 <option value="">Todos los estados</option>
                                 <option value="PENDIENTE">Pendiente</option>
                                 <option value="PAGADO">Pagado</option>
-                                <option value="VENCIDO">Vencido</option>
+                                <option value="CANCELADO">Cancelado</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <input type="date" class="form-control" id="fechaDesde" name="fechaDesde">
+                            <label class="col-form-label">Filtrar por mes y año</label>
+                            <input type="month" class="form-control" id="mesPago" name="mesPago"
+                                th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM')}"
+                                th:max="${#temporals.format(#temporals.createNow(), 'yyyy-MM')}">
                         </div>
-                        <div class="col-md-3">
-                            <button type="submit" class="btn btn-secondary w-100">Filtrar</button>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-secondary w-100" onclick="reiniciarFiltrosPagos()">
+                                <i class="fas fa-sync-alt me-1"></i>Reiniciar
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
 
+            <!-- Agregar para depuración -->
+            <div class="alert alert-info mb-3">
+                <span>Total registros: <strong th:text="${page.totalElements}"></strong></span>
+                <span class="ml-3">Registros por página: <strong th:text="${page.size}"></strong></span>
+                <span class="ml-3">Mes actual: <strong
+                        th:text="${#temporals.format(#temporals.createNow(), 'MMMM yyyy')}"></strong></span>
+            </div>
+
             <!-- Tabla de pagos -->
-            <div class="table-responsive" th:fragment="tablaPagos">
+            <div th:fragment="tablaPagos" class="table-responsive" 
+                 th:if="${page != null}"
+                 th:data-total-elements="${page.totalElements}"
+                 th:data-page-size="${page.size}" 
+                 th:data-current-page="${page.number}">
                 <table class="table table-hover">
                     <thead class="table-light">
                         <tr>
@@ -61,25 +81,32 @@
                         <tr th:each="pago : ${pagos}">
                             <td th:text="${pago.id}">1</td>
                             <td th:text="${pago.alumno.nombre}">Juan Pérez</td>
-                            <td th:text="${'$' + pago.monto}">$100.00</td>
-                            <td th:text="${#temporals.format(pago.fecha, 'dd/MM/yyyy')}">01/01/2024</td>
+                            <td th:text="${'€' + pago.monto}">$100.00</td>
+                            <td th:text="${#temporals.format(pago.fecha, 'MMMM yyyy')}">Enero 2024</td>
                             <td>
                                 <span th:class="${'badge ' + 
-                                    (pago.estado == 'PAGADO' ? 'bg-success' : 
-                                    (pago.estado == 'PENDIENTE' ? 'bg-warning' : 'bg-danger'))}"
-                                      th:text="${pago.estado}">
+                                    (pago.estado.name() == 'PAGADO' ? 'bg-success' : 
+                                    (pago.estado.name() == 'PENDIENTE' ? 'bg-warning' : 'bg-danger'))}"
+                                    th:text="${pago.estado}">
                                 </span>
                             </td>
                             <td>
                                 <div class="btn-group">
-                                    <button class="btn btn-sm btn-outline-primary"
-                                            th:if="${pago.estado == 'PENDIENTE'}"
-                                            th:onclick="'registrarPago(' + ${pago.id} + ')'">
-                                        Registrar Pago
+                                    <button class="btn btn-sm btn-success" th:if="${pago.estado.name() == 'PENDIENTE'}"
+                                        th:onclick="'registrarPago(' + ${pago.id} + ')'" th:title="Confirmar">
+                                        <i class="fas fa-check-circle mx-1"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-info"
-                                            th:onclick="'verDetalles(' + ${pago.id} + ')'">
-                                        Ver Detalles
+                                    <button class="btn btn-sm btn-info"
+                                        th:onclick="'verDetallesPagos(' + ${pago.id} + ')'" th:title="'Ver detalles'">
+                                        <i class="fas fa-eye mx-1"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" th:if="${pago.estado.name() == 'CANCELADO'}"
+                                        th:onclick="'eliminarPago(' + ${pago.id} + ')'" th:title="Eliminar">
+                                        <i class="fas fa-trash mx-1"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" th:if="${pago.estado.name() == 'PENDIENTE'}"
+                                        th:onclick="'cancelarPago(' + ${pago.id} + ')'" th:title="Cancelar">
+                                        <i class="fas fa-ban mx-1"></i>
                                     </button>
                                 </div>
                             </td>
@@ -87,12 +114,59 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+            <div th:if="${page == null}" class="alert alert-warning">
+                No hay datos disponibles
+            </div>
+            <!-- Paginación -->
+            <div th:if="${page.totalElements > page.size}" class="d-flex justify-content-center mt-4">
+                <nav aria-label="Navegación de páginas">
+                    <ul class="pagination">
+                        <!-- Primera página -->
+                        <li class="page-item" th:classappend="${page.first ? 'disabled' : ''}">
+                            <a class="page-link" href="javascript:void(0)" onclick="cambiarPaginaPagos(0)">&laquo;</a>
+                        </li>
 
-        <!-- Modal Nuevo Pago -->
-        <div th:replace="~{pagos/modal-pago :: modal}"></div>
+                        <!-- Página anterior -->
+                        <li class="page-item" th:classappend="${page.first ? 'disabled' : ''}">
+                            <a class="page-link" href="javascript:void(0)"
+                                th:attr="onclick='cambiarPaginaPagos(' + ${page.number - 1} + ')'">&lt;</a>
+                        </li>
+
+                        <!-- Páginas -->
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                            th:classappend="${i == page.number ? 'active' : ''}">
+                            <a class="page-link" href="javascript:void(0)"
+                                th:attr="onclick='cambiarPaginaPagos(' + ${i} + ')'" th:text="${i + 1}"></a>
+                        </li>
+
+                        <!-- Siguiente página -->
+                        <li class="page-item" th:classappend="${page.last ? 'disabled' : ''}">
+                            <a class="page-link" href="javascript:void(0)"
+                                th:attr="onclick='cambiarPaginaPagos(' + ${page.number + 1} + ')'">&gt;</a>
+                        </li>
+
+                        <!-- Última página -->
+                        <li class="page-item" th:classappend="${page.last ? 'disabled' : ''}">
+                            <a class="page-link" href="javascript:void(0)"
+                                th:attr="onclick='cambiarPaginaPagos(' + ${page.totalPages - 1} + ')'">&raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
     </main>
 
+    <!-- Modal Detalles Pago -->
+    <div class="modal fade" id="detallePagoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- El contenido se cargará dinámicamente -->
+            </div>
+        </div>
+    </div>
+    <!-- Modal Nuevo Pago -->
+    <div th:replace="~{pagos/modal-pago :: modal}"></div>
     <div th:replace="~{layout/base :: scripts}"></div>
 </body>
-</html> 
+
+</html>

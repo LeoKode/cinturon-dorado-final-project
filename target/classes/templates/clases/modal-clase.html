@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-    <div th:fragment="modal" class="modal fade" id="nuevaClaseModal" tabindex="-1">
+    <div th:fragment="modal" class="modal fade" id="claseModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Nueva Clase</h5>
+                    <h5 class="modal-title">Configurar Clase</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="claseForm">
+                    <form id="claseForm" th:action="@{/clases/guardar}" method="post">
+                        <input type="hidden" id="claseId" name="id">
+                        <input type="hidden" id="diaClase" name="dia">
+                        <input type="hidden" id="horarioId" name="horario.id">
+                        
                         <div class="mb-3">
-                            <label for="titulo" class="form-label">Nombre de la Clase</label>
+                            <label for="titulo" class="form-label">Título de la Clase</label>
                             <input type="text" class="form-control" id="titulo" name="titulo" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="duracion" class="form-label">Duración (minutos)</label>
-                            <input type="number" class="form-control" id="duracion" name="duracion" required min="30" step="30">
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-danger me-auto" id="btnEliminar" style="display: none;">
+                        Eliminar Clase
+                    </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="agregarClaseDisponible()">Guardar</button>
+                    <button type="submit" form="claseForm" class="btn btn-primary">Guardar</button>
                 </div>
             </div>
         </div>

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <body>
     <div th:fragment="modal" class="modal fade" id="nuevoExamenModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Programar Nuevo Examen</h5>
@@ -10,29 +11,32 @@
                 </div>
                 <div class="modal-body">
                     <form id="examenForm" th:action="@{/examenes}" method="post">
+                        <!-- Añadir selector de categoría -->
                         <div class="mb-3">
-                            <label for="alumno.Id" class="form-label">Alumno</label>
-                            <select class="form-select" id="alumno.Id" name="alumno.Id" required>
-                                <option value="">Seleccione un alumno</option>
-                                <option th:each="alumno : ${alumnos}"
+                            <label for="categoriaFiltro" class="form-label">Categoría de Alumnos</label>
+                            <select class="form-select" id="categoriaFiltro" onchange="filtrarAlumnosPorCategoria()">
+                                <option value="">Todas las categorías</option>
+                                <option value="ADULTOS">Adultos</option>
+                                <option value="MENORES">Menores</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Modificar el select de alumnos -->
+                        <div class="mb-3">
+                            <label for="alumnoIds" class="form-label">Alumnos</label>
+                            <select class="form-select" id="alumnoIds" name="alumnoIds" multiple required>
+                                <option th:each="alumno : ${alumnos}" 
                                         th:value="${alumno.id}"
-                                        th:text="${alumno.nombre}">
+                                        th:text="${alumno.nombre + ' - ' + alumno.nivelCinturon}"
+                                        th:data-categoria="${alumno.categoria}">
                                 </option>
                             </select>
+                            <small class="form-text text-muted">Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples alumnos</small>
                         </div>
                         <div class="mb-3">
-                            <label for="evaluadorId" class="form-label">Evaluador</label>
-                            <select class="form-select" id="evaluadorId" name="evaluadorId">
-                                <option value="">Seleccione un evaluador</option>
-                                <option th:each="profesor : ${profesores}"
-                                        th:value="${profesor.id}"
-                                        th:text="${profesor.nombre}">
-                                </option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="fecha" class="form-label">Fecha y Hora</label>
-                            <input type="datetime-local" class="form-control" id="fecha" name="fecha" required>
+                            <label for="fecha" class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="fecha" name="fecha"
+                                th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
                         </div>
                     </form>
                 </div>
@@ -44,4 +48,5 @@
         </div>
     </div>
 </body>
+
 </html>

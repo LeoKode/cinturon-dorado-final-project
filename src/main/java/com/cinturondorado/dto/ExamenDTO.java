@@ -13,7 +13,9 @@ import lombok.AllArgsConstructor;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.Size;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,7 +26,7 @@ public class ExamenDTO {
     private Long id;
 
     @NotNull(message = "El alumno es requerido")
-    private Alumno alumno; // Cambiado de Long alumnoId a Alumno
+    private List<Long> alumnoIds;
 
     //@NotNull(message = "El evaluador es requerido")
     private Long evaluadorId;
@@ -32,7 +34,7 @@ public class ExamenDTO {
     @NotNull(message = "La fecha es requerida")
     @Future(message = "La fecha debe ser futura")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime fecha;
+    private LocalDate fecha;
 
     @NotNull(message = "El nivel actual es requerido")
     private NivelCinturon nivelActual;
@@ -49,5 +51,5 @@ public class ExamenDTO {
 
     private boolean aprobado;
     
-    private LocalDateTime fechaEvaluacion;
+    private LocalDate fechaEvaluacion;
 }

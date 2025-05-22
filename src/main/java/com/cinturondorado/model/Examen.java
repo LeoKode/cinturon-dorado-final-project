@@ -9,7 +9,7 @@ import javax.persistence.*;
 
 import org.hibernate.annotations.ColumnTransformer;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "examenes")
@@ -30,7 +30,7 @@ public class Examen {
     private Profesor evaluador;
 
     @Column(nullable = false)
-    private LocalDateTime fecha;
+    private LocalDate fecha;
 
     @ColumnTransformer(write = "?::nivel_cinturon_enum")
     @Enumerated(EnumType.STRING)
@@ -42,7 +42,6 @@ public class Examen {
     @Column(nullable = false)
     private NivelCinturon nivelAspirante;
 
-    @ColumnTransformer(write = "?::estado_enum")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EstadoExamen estado;
@@ -51,8 +50,6 @@ public class Examen {
     private String observaciones;
 
     private String resultado;
-
-    private LocalDateTime fechaEvaluacion;
 
     @PrePersist
     protected void onCreate() {

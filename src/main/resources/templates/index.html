@@ -1,59 +1,94 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{layout/base :: head}"></head>
+
 <body>
     <nav th:replace="~{layout/base :: nav}"></nav>
-    
-    <main class="container my-4">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h1 class="display-4">Bienvenido a Cinturón Dorado</h1>
+
+    <main class="container my-5">
+        <!-- Hero Section -->
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h1 class="display-4 fw-bold">Bienvenido a KumgangFM</h1>
+                <p class="lead">Sistema de Gestión para Escuelas de Artes Marciales</p>
             </div>
         </div>
-        <div class="row g-4">
-            <!-- Tarjetas de estadísticas -->
+
+        <!-- Tarjetas de estadísticas con iconos y efectos -->
+        <div class="row g-4 mb-5">
             <div class="col-md-3">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
+                <div class="card bg-primary text-white h-100 shadow-sm hover-card">
+                    <div class="card-body d-flex flex-column align-items-center">
+                        <i class="fas fa-users fa-3x mb-3"></i>
                         <h5 class="card-title">Total Alumnos</h5>
                         <p class="card-text display-6" th:text="${totalAlumnos}">0</p>
+                        <a href="/alumnos" class="mt-auto btn btn-light btn-sm">Ver Alumnos</a>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
+                <div class="card bg-success text-white h-100 shadow-sm hover-card">
+                    <div class="card-body d-flex flex-column align-items-center">
+                        <i class="fas fa-calendar-alt fa-3x mb-3"></i>
                         <h5 class="card-title">Clases Hoy</h5>
                         <p class="card-text display-6" th:text="${clasesHoy}">0</p>
+                        <a href="/clases" class="mt-auto btn btn-light btn-sm">Ver Clases</a>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card bg-warning text-dark">
-                    <div class="card-body">
+                <div class="card bg-warning text-white h-100 shadow-sm hover-card">
+                    <div class="card-body d-flex flex-column align-items-center">
+                        <i class="fas fa-money-bill-wave fa-3x mb-3"></i>
                         <h5 class="card-title">Pagos Pendientes</h5>
                         <p class="card-text display-6" th:text="${pagosPendientes}">0</p>
+                        <a href="/pagos" class="mt-auto btn btn-light btn-sm">Ver Pagos</a>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
+                <div class="card bg-info text-white h-100 shadow-sm hover-card">
+                    <div class="card-body d-flex flex-column align-items-center">
+                        <i class="fas fa-graduation-cap fa-3x mb-3"></i>
                         <h5 class="card-title">Próximos Exámenes</h5>
                         <p class="card-text display-6" th:text="${proximosExamenes}">0</p>
+                        <a href="/examenes" class="mt-auto btn btn-light btn-sm">Ver Exámenes</a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Botón para actualizar -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <a href="/" class="btn btn-primary">Actualizar estadísticas</a>
+        <!-- Accesos Directos -->
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h3 class="mb-4">Accesos Rápidos</h3>
+                <div class="d-flex gap-3 justify-content-center">
+                    <button class="btn btn-outline-primary" onclick="nuevoAlumno()">
+                        <i class="fas fa-user-plus me-2"></i>Nuevo Alumno
+                    </button>
+                    <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#nuevaClaseModal">
+                        <i class="fas fa-plus-circle me-2"></i>Nueva Clase
+                    </button>
+                    <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#nuevoPagoModal">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>Registrar Pago
+                    </button>
+                    <button class="btn btn-outline-info" data-bs-toggle="modal"
+                        data-bs-target="#nuevoExamenModal">
+                        <i class="fas fa-clipboard-check me-2"></i>Programar Examen
+                    </button>
+                </div>
             </div>
         </div>
     </main>
 
+    <!-- Modales -->
+    <div th:replace="~{alumnos/modal-alumno :: modal}"></div>
+    <div th:replace="~{clases/modal-clase :: modal}"></div>
+    <div th:replace="~{pagos/modal-pago :: modal}"></div>
+    <div th:replace="~{examenes/modal-programar-evaluacion :: modal}"></div>
+
     <div th:replace="~{layout/base :: scripts}"></div>
 </body>
+
 </html>

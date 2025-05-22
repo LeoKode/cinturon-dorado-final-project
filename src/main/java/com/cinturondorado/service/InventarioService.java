@@ -1,6 +1,7 @@
 package com.cinturondorado.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import com.cinturondorado.model.enums.TipoEquipo;
 import com.cinturondorado.repository.InventarioRepository;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +26,6 @@ public class InventarioService {
     private final InventarioRepository inventarioRepository;
     private final NotificacionService notificacionService;
 
-    @Autowired
     public InventarioService(InventarioRepository inventarioRepository,
                            NotificacionService notificacionService) {
         this.inventarioRepository = inventarioRepository;
@@ -54,16 +55,21 @@ public class InventarioService {
         }
     }
 
-    public void actualizarCantidad(Long id, Integer cantidad) {
-        Inventario item = inventarioRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Item no encontrado"));
-        
-        item.setCantidad(cantidad);
-        item.setFechaUltimaActualizacion(LocalDate.now());
-        
-        Inventario itemActualizado = inventarioRepository.save(item);
-        verificarStockMinimo(itemActualizado);
-    }
+    public void actualizarItem(Long id, String nombre, TipoEquipo tipo, Integer cantidad, 
+                          Integer stockMinimo, String descripcion) {
+    Inventario item = inventarioRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Item no encontrado"));
+    
+    item.setNombre(nombre);
+    item.setTipo(tipo);
+    item.setCantidad(cantidad);
+    item.setStockMinimo(stockMinimo);
+    item.setDescripcion(descripcion);
+    item.setFechaUltimaActualizacion(LocalDate.now());
+    
+    Inventario itemActualizado = inventarioRepository.save(item);
+    verificarStockMinimo(itemActualizado);
+}
 
     public List<Inventario> obtenerItemsBajoStock() {
         return inventarioRepository.findAll().stream()
@@ -72,7 +78,15 @@ public class InventarioService {
     }
 
     public List<Inventario> obtenerPorTipo(TipoEquipo tipo) {
-        return inventarioRepository.findByTipo(tipo);
+        try {
+            log.debug("Intentando obtener items por tipo: {}", tipo);
+            // Usar una query nativa para asegurar la conversión correcta del enum
+            return inventarioRepository.findByTipo(tipo);
+        } catch (Exception e) {
+            log.error("Error al obtener items por tipo {}: {}", tipo, e.getMessage());
+            e.printStackTrace(); // Para ver el stack trace completo
+            return Collections.emptyList();
+        }
     }
 
     private void verificarStockMinimo(Inventario item) {
@@ -90,7 +104,8 @@ public class InventarioService {
     }
 
     public Inventario obtenerPorId(Long id) {
-        throw new UnsupportedOperationException("Unimplemented method 'obtenerPorId'");
+        return inventarioRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Item no encontrado"));
     }
 
     public List<Inventario> obtenerTodoItems() {
@@ -101,5 +116,17 @@ public class InventarioService {
         Inventario item = inventarioRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Item no encontrado"));
         inventarioRepository.delete(item);
+    }
+
+    public Page<Inventario> obtenerTodoItemsPaginados(Pageable pageable) {
+        return inventarioRepository.findAll(pageable);
+    }
+
+    public Page<Inventario> obtenerPorTipoPaginado(TipoEquipo tipo, Pageable pageable) {
+        return inventarioRepository.findByTipo(tipo, pageable);
+    }
+
+    public Page<Inventario> obtenerItemsBajoStockPaginados(Pageable pageable) {
+        return inventarioRepository.findByStockMenorQueMinimo(pageable);
     }
 } 
