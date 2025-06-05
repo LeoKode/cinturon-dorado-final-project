@@ -1,17 +1,15 @@
 package com.cinturondorado.repository;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.cinturondorado.model.Clase;
-import com.cinturondorado.model.HorarioDisponible;
+import java.util.List;
 
-@Repository
 public interface ClaseRepository extends JpaRepository<Clase, Long> {
-    Optional<Clase> findByDiaAndHorario(String dia, HorarioDisponible horario);
-    List<Clase> findByHorario(HorarioDisponible horario);
-    boolean existsByDiaAndHorario(String dia, HorarioDisponible horario);
+    boolean existsByNombre(String nombre);
+    
+    @Query("SELECT c FROM Clase c JOIN c.calendarioClases h WHERE h.dia = :dia ORDER BY h.hora")
+    List<Clase> findByDiaOrderByHora(@Param("dia") String dia);
 }

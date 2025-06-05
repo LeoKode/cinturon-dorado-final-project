@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function initializeSearchForm() {
     const alumnoSearch = document.getElementById('searchNombre');
-    const categoriaSelect = document.getElementById('searchCategoria');
+    const claseIdSelect = document.getElementById('searchClaseId');
     const nivelSelect = document.getElementById('searchNivel');
     
     // Event listeners
@@ -17,8 +17,8 @@ function initializeSearchForm() {
         }, 300));
     }
 
-    if (categoriaSelect) {
-        categoriaSelect.addEventListener('change', () => {
+    if (claseIdSelect) {
+        claseIdSelect.addEventListener('change', () => {
             actualizarTablaAlumnos();
         });
     }
@@ -52,14 +52,14 @@ function realizarBusqueda(event) {
     }
     
     const nombre = document.getElementById('searchNombre')?.value?.trim() || '';
-    const categoria = document.getElementById('searchCategoria')?.value || '';
+    const claseId = document.getElementById('searchClaseId')?.value || '';
     const nivel = document.getElementById('searchNivel')?.value || '';
     
-    console.log('Realizando búsqueda con:', { nombre, categoria, nivel });
+    console.log('Realizando búsqueda con:', { nombre, claseId, nivel });
     
     const params = new URLSearchParams();
     if (nombre) params.append('nombre', nombre);
-    if (categoria) params.append('categoria', categoria);
+    if (claseId) params.append('claseId', claseId);
     if (nivel) params.append('nivelCinturon', nivel);
     params.append('page', '0');
     
@@ -219,7 +219,7 @@ function actualizarTablaConHTML(html) {
     // Obtener los parámetros actuales de búsqueda
     const url = new URL(window.location.href);
     const nombreValue = document.getElementById('searchNombre')?.value || '';
-    const categoriaValue = document.getElementById('searchCategoria')?.value || '';
+    const claseIdValue = document.getElementById('searchClaseId')?.value || '';
     const nivelValue = document.getElementById('searchNivel')?.value || '';
     const pageValue = document.querySelector('#tablaAlumnos')?.getAttribute('data-current-page') || '0';
     
@@ -227,8 +227,8 @@ function actualizarTablaConHTML(html) {
     if (nombreValue) url.searchParams.set('nombre', nombreValue);
     else url.searchParams.delete('nombre');
     
-    if (categoriaValue) url.searchParams.set('categoria', categoriaValue);
-    else url.searchParams.delete('categoria');
+    if (claseIdValue) url.searchParams.set('claseId', claseIdValue);
+    else url.searchParams.delete('claseId');
     
     if (nivelValue) url.searchParams.set('nivelCinturon', nivelValue);
     else url.searchParams.delete('nivelCinturon');
@@ -242,7 +242,7 @@ function actualizarTablaConHTML(html) {
 
 function reiniciarFiltrosAlumnos() {
     document.getElementById('searchNombre').value = '';
-    document.getElementById('searchCategoria').value = '';
+    document.getElementById('searchClaseId').value = '';
     document.getElementById('searchNivel').value = '';
     actualizarTablaAlumnos();
 }
@@ -263,13 +263,13 @@ function debounce(func, wait) {
 // Función para cambiar página
 function cambiarPagina(page) {
     const nombre = document.getElementById('searchNombre')?.value?.trim() || '';
-    const categoria = document.getElementById('searchCategoria')?.value || '';
+    const claseId = document.getElementById('searchClaseId')?.value || '';
     const nivel = document.getElementById('searchNivel')?.value || '';
 
     const params = new URLSearchParams();
     params.append('page', page);
     if (nombre) params.append('nombre', nombre);
-    if (categoria) params.append('categoria', categoria);
+    if (claseId) params.append('claseId', claseId);
     if (nivel) params.append('nivelCinturon', nivel);
 
     mostrarIndicadorCarga(true);
@@ -483,7 +483,7 @@ function reinicializarBotones() {
 
 function actualizarTablaAlumnos() {
     const nombre = document.getElementById('searchNombre')?.value?.trim() || '';
-    const categoria = document.getElementById('searchCategoria')?.value || '';
+    const claseId = document.getElementById('searchClaseId')?.value || '';
     const nivel = document.getElementById('searchNivel')?.value || '';
 
     // Construir URL base y parámetros
@@ -492,7 +492,7 @@ function actualizarTablaAlumnos() {
 
     // Añadir parámetros solo si tienen valor
     if (nombre) params.append('nombre', nombre);
-    if (categoria) params.append('categoria', categoria);
+    if (claseId) params.append('claseId', claseId);
     if (nivel) params.append('nivelCinturon', nivel);
 
     // Añadir parámetros a la URL si existen
@@ -531,38 +531,32 @@ function guardarAlumno() {
 }
 
 function editarAlumno(button) {
-    // First show the modal
     const modal = new bootstrap.Modal(document.getElementById('nuevoAlumnoModal'));
     modal.show();
 
-    // Then get the data attributes
     const id = button.getAttribute('data-id');
     const nombre = button.getAttribute('data-nombre');
     const fechaNacimiento = button.getAttribute('data-fecha-nacimiento');
     const email = button.getAttribute('data-email');
     const telefono = button.getAttribute('data-telefono');
     const nivelCinturon = button.getAttribute('data-nivel-cinturon');
-    const categoria = button.getAttribute('data-categoria');
+    const claseIds = button.getAttribute('data-clase-ids');
 
-    // Wait for modal to be shown before trying to access form elements
     modal._element.addEventListener('shown.bs.modal', function () {
         const form = document.getElementById('alumnoForm');
         if (form) {
-            // Establecer la acción del formulario para actualizar
             form.action = `/alumnos`;
 
-            // Rellenar los campos del formulario con los datos del alumno
             const formFields = {
                 'id': id,
                 'nombre': nombre,
                 'fechaNacimiento': fechaNacimiento,
                 'email': email,
                 'telefono': telefono,
-                'nivelCinturon': nivelCinturon,
-                'categoria': categoria
+                'nivelCinturon': nivelCinturon
             };
 
-            // Update each field if it exists
+            // Actualizar campos simples
             Object.entries(formFields).forEach(([key, value]) => {
                 const field = form.querySelector(`[name="${key}"]`);
                 if (field) {
@@ -570,10 +564,18 @@ function editarAlumno(button) {
                 }
             });
 
-            // Actualizar el título del modal
+            // Actualizar selección múltiple de clases
+            const clasesSelect = form.querySelector('[name="claseIds"]');
+            if (clasesSelect && claseIds) {
+                const selectedClaseIds = claseIds.split(',');
+                Array.from(clasesSelect.options).forEach(option => {
+                    option.selected = selectedClaseIds.includes(option.value);
+                });
+            }
+
             modal._element.querySelector('.modal-title').textContent = 'Editar Alumno';
         }
-    }, { once: true }); // Remove listener after first execution
+    }, { once: true });
 }
 
 // Función para preparar el modal para crear un nuevo alumno

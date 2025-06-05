@@ -1,24 +1,22 @@
 package com.cinturondorado.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
+import javax.persistence.UniqueConstraint;
 
 import lombok.Data;
 
 @Entity
+@Table(name = "calendario_clases",
+       uniqueConstraints = @UniqueConstraint(columnNames = {"dia", "hora"}))
 @Data
-@Table(name = "horarios_disponibles")
-public class HorarioDisponible {
+public class CalendarioClase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,8 +25,9 @@ public class HorarioDisponible {
     private String hora;
 
     @Column(nullable = false)
-    private boolean activo = true;
+    private String dia;
 
-    @OneToMany(mappedBy = "horario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Clase> clases = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "clase_id")
+    private Clase clase;
 }

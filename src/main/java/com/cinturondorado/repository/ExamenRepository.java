@@ -3,7 +3,6 @@ package com.cinturondorado.repository;
 import com.cinturondorado.model.Examen;
 import com.cinturondorado.model.enums.NivelCinturon;
 import com.cinturondorado.model.enums.EstadoExamen;
-import com.cinturondorado.model.enums.CategoriaAlumno;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,6 +21,9 @@ public interface ExamenRepository extends JpaRepository<Examen, Long> {
     List<Examen> findByNivelAspirante(NivelCinturon nivelAspirante);
     List<Examen> findByNivelActualAndNivelAspirante(NivelCinturon nivelActual, NivelCinturon nivelAspirante);
     long countByFechaGreaterThanEqualAndEstado(LocalDate fecha, EstadoExamen estado);
+    Page<Examen> findByNivelAspirante(NivelCinturon nivelAspirante, Pageable pageable);
+    Page<Examen> findByEstado(EstadoExamen estado, Pageable pageable);
+    Page<Examen> findByNivelAspiranteAndEstado(NivelCinturon nivelAspirante, EstadoExamen estado, Pageable pageable);
 
     // Búsquedas por estado
     List<Examen> findByEstado(EstadoExamen estado);
@@ -55,33 +57,6 @@ public interface ExamenRepository extends JpaRepository<Examen, Long> {
         Pageable pageable
     );
 
-    Page<Examen> findByNivelAspirante(NivelCinturon nivelAspirante, Pageable pageable);
-    Page<Examen> findByEstado(EstadoExamen estado, Pageable pageable);
-    Page<Examen> findByNivelAspiranteAndEstado(NivelCinturon nivelAspirante, EstadoExamen estado, Pageable pageable);
-
-    @Query("SELECT e FROM Examen e WHERE " +
-           "(:categoria IS NULL OR e.alumno.categoria = :categoria) AND " +
-           "(:nivelAspirante IS NULL OR e.nivelAspirante = :nivelAspirante) AND " +
-           "(:estado IS NULL OR e.estado = :estado)")
-    Page<Examen> findByAlumnoCategoriaAndFilters(
-        @Param("categoria") CategoriaAlumno categoria,
-        @Param("nivelAspirante") NivelCinturon nivelAspirante,
-        @Param("estado") EstadoExamen estado,
-        Pageable pageable);
-
-    @Query("SELECT e FROM Examen e WHERE " +
-           "(:categoria IS NULL OR e.alumno.categoria = :categoria) AND " +
-           "(:nivelAspirante IS NULL OR e.nivelAspirante = :nivelAspirante) AND " +
-           "(:estado IS NULL OR e.estado = :estado) AND " +
-           "e.fecha >= :startDate AND e.fecha <= :endDate")
-    Page<Examen> findByFiltersAndYear(
-        @Param("categoria") CategoriaAlumno categoria,
-        @Param("nivelAspirante") NivelCinturon nivelAspirante,
-        @Param("estado") EstadoExamen estado,
-        @Param("startDate") LocalDate startDate,
-        @Param("endDate") LocalDate endDate,
-        Pageable pageable);
-
     @Query("SELECT e FROM Examen e WHERE " +
            "(:nivelAspirante IS NULL OR e.nivelAspirante = :nivelAspirante) AND " +
            "(:estado IS NULL OR e.estado = :estado) AND " +
@@ -94,15 +69,25 @@ public interface ExamenRepository extends JpaRepository<Examen, Long> {
         Pageable pageable);
 
     @Query("SELECT e FROM Examen e WHERE " +
-           "(:categoria IS NULL OR e.alumno.categoria = :categoria) AND " +
+           "(:claseId IS NULL OR e.alumno.id IN (SELECT a.id FROM Alumno a JOIN a.clases c WHERE c.id = :claseId)) AND " +
            "(:nivelAspirante IS NULL OR e.nivelAspirante = :nivelAspirante) AND " +
            "(:estado IS NULL OR e.estado = :estado) AND " +
            "e.fecha BETWEEN :fechaInicio AND :fechaFin")
     Page<Examen> findByAllFilters(
-        @Param("categoria") CategoriaAlumno categoria,
-        @Param("nivelAspirante") NivelCinturon nivelAspirante,
-        @Param("estado") EstadoExamen estado,
-        @Param("fechaInicio") LocalDate fechaInicio,
-        @Param("fechaFin") LocalDate fechaFin,
-        Pageable pageable);
+            @Param("claseId") Long claseId,
+            @Param("nivelAspirante") NivelCinturon nivelAspirante,
+            @Param("estado") EstadoExamen estado,
+            @Param("fechaInicio") LocalDate fechaInicio,
+            @Param("fechaFin") LocalDate fechaFin,
+            Pageable pageable);
+
+    @Query("SELECT e FROM Examen e WHERE " +
+           "e.alumno.id IN (SELECT a.id FROM Alumno a JOIN a.clases c WHERE c.id = :claseId) AND " +
+           "(:nivelAspirante IS NULL OR e.nivelAspirante = :nivelAspirante) AND " +
+           "(:estado IS NULL OR e.estado = :estado)")
+    Page<Examen> findByAlumnoClaseAndFilters(
+            @Param("claseId") Long claseId,
+            @Param("nivelAspirante") NivelCinturon nivelAspirante,
+            @Param("estado") EstadoExamen estado,
+            Pageable pageable);
 }

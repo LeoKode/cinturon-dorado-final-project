@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="modal">
+        <div class="modal fade" id="gestionarAlumnosModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div th:if="${error}" class="modal-header">
+                        <h5 class="modal-title text-danger">Error</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div th:if="${error}" class="modal-body">
+                        <div class="alert alert-danger" th:text="${error}">Error</div>
+                    </div>
+                    
+                    <div th:unless="${error}">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-users me-2"></i>Gestionar Alumnos
+                                <span th:if="${clase != null}" th:text="${' - ' + clase.nombre}"></span>
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" id="gestionClaseId" th:value="${clase != null ? clase.id : ''}" />
+                            
+                            <div th:if="${clase == null}" class="alert alert-warning">
+                                No se encontró la clase seleccionada
+                            </div>
+                            
+                            <div th:if="${clase != null}">
+                                <div class="row">
+                                    <!-- Lista de alumnos inscritos -->
+                                    <div class="col-md-6">
+                                        <h6 class="mb-3">Alumnos Inscritos</h6>
+                                        <div class="list-group">
+                                            <div th:each="alumno : ${alumnosInscritos}" 
+                                                 class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span th:text="${alumno.nombre}">Nombre del Alumno</span>
+                                                    <small class="text-muted d-block" th:text="${alumno.nivelCinturon}">Cinturón</small>
+                                                </div>
+                                                <form th:action="@{/clases/{claseId}/desinscribir/{alumnoId}(claseId=${clase.id},alumnoId=${alumno.id})}"
+                                                      method="POST" style="display: inline;">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                            onclick="return confirm('¿Está seguro de desinscribir al alumno?')">
+                                                        <i class="fas fa-user-minus"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                            <div th:if="${#lists.isEmpty(alumnosInscritos)}" 
+                                                 class="list-group-item text-muted">
+                                                No hay alumnos inscritos
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Lista de alumnos disponibles -->
+                                    <div class="col-md-6">
+                                        <h6 class="mb-3">Alumnos Disponibles</h6>
+                                        <form th:action="@{/clases/{id}/inscribir(id=${clase.id})}" method="POST">
+                                            <div class="input-group mb-3">
+                                                <select class="form-select" name="alumnoId" required>
+                                                    <option value="">Seleccionar alumno...</option>
+                                                    <option th:each="alumno : ${alumnosDisponibles}"
+                                                            th:value="${alumno.id}"
+                                                            th:text="${alumno.nombre + ' - ' + alumno.nivelCinturon}">
+                                                    </option>
+                                                </select>
+                                                <button class="btn btn-primary" type="submit"
+                                                        th:disabled="${clase.cantidadAlumnos >= clase.cupoMaximo}">
+                                                    <i class="fas fa-user-plus"></i>
+                                                </button>
+                                            </div>
+                                        </form>
+                                        <div th:if="${#lists.isEmpty(alumnosDisponibles)}" 
+                                             class="alert alert-info">
+                                            No hay alumnos disponibles para inscribir
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

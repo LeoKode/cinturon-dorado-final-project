@@ -63,16 +63,14 @@ function initializeExamenesForm() {
 function realizarBusqueda() {
     const nivelAspirante = document.getElementById('nivelAspirante')?.value || '';
     const estado = document.getElementById('estado')?.value || '';
-    const categoriaAlumno = document.getElementById('categoriaAlumno')?.value || '';
+    const claseId = document.getElementById('claseSelect')?.value || ''; // Changed from categoriaAlumno
     const year = document.getElementById('yearExamen')?.value || '';
     
     const params = new URLSearchParams();
     
     if (nivelAspirante) params.append('nivelAspirante', nivelAspirante);
     if (estado) params.append('estado', estado);
-    if (categoriaAlumno && categoriaAlumno !== '') {
-        params.append('categoriaAlumno', categoriaAlumno.toUpperCase());
-    }
+    if (claseId) params.append('claseId', claseId);
     if (year) params.append('year', year);
 
     fetch(`/examenes/buscar?${params.toString()}`)

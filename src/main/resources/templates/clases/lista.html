@@ -5,91 +5,148 @@
 
 <body>
     <nav th:replace="~{layout/base :: nav}"></nav>
-
-    <div th:fragment="message" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <span th:text="${error}">Error message here</span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <!-- Indicador de carga -->
+    <div id="loadingIndicator" style="display: none;"
+        class="position-fixed top-50 start-50 translate-middle">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
     </div>
-
     <main class="container my-5">
-        <div class="d-flex justify-content-between align-items-center m-4">
-            <h2 class="section-title">Horarios de Clases</h2>
-            <button class="btn btn-primary" onclick="mostrarModalNuevoHorario()">
-                <i class="fas fa-plus me-1"></i>Añadir Horario
-            </button>
+        <!-- Sección de Clases -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center bg-gradient">
+                <h5 class="mb-0 text-primary">
+                    <i class="fas fa-dumbbell me-2"></i>Clases Disponibles
+                </h5>
+                <button class="btn btn-primary btn-hover-effect" id="btnNuevaClase">
+                    <i class="fas fa-plus me-2"></i>Nueva Clase
+                </button>
+            </div>
+            <div class="card-body bg-light">
+                <div class="row g-4" id="clasesContainer">
+                    <div class="col-md-4 col-lg-3" th:each="clase : ${clases}">
+                        <div class="clase-card card h-100 border-0 shadow-sm hover-effect">
+                            <div class="card-body d-flex flex-column">
+                                <div class="clase-header mb-3">
+                                    <h5 class="card-title text-primary mb-1" th:text="${clase.nombre}">
+                                        Nombre clase
+                                    </h5>
+                                    <div class="clase-info">
+                                        <span class="badge bg-info" style="cursor: pointer;"
+                                            th:data-clase-id="${clase.id}"
+                                            th:onclick="'mostrarModalGestionAlumnos(' + ${clase.id} + ')'">
+                                            <i class="fas fa-users me-1"></i>
+                                            <span th:text="${clase.cantidadAlumnos + ' / ' + clase.cupoMaximo}">0/20</span>
+                                        </span>
+                                        <!-- Agregar indicador visual de capacidad -->
+                                        <div class="progress mt-2" style="height: 5px;">
+                                            <div class="progress-bar" role="progressbar"
+                                                th:style="'width: ' + ${(clase.cantidadAlumnos * 100 / clase.cupoMaximo)} + '%'"
+                                                th:classappend="${clase.cantidadAlumnos >= clase.cupoMaximo ? 'bg-danger' : 'bg-success'}"
+                                                aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Modificar esta sección para usar los horarios -->
+                                    <div class="clase-badge" th:if="${!clase.horarios.empty}">
+                                        <div th:each="horario : ${clase.horarios}" class="horario-item">
+                                            <div class="d-flex align-items-center mb-1">
+                                                <span class="badge bg-primary text-white">
+                                                    <i class="fas fa-calendar-day me-1"></i>
+                                                    <span th:text="${horario.dia}">Lunes</span>
+                                                </span>
+                                                <span class="badge bg-info text-white ms-2">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    <span th:text="${horario.hora}">10:00</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="card-text flex-grow-1" th:text="${clase.descripcion}">
+                                    Descripción
+                                </p>
+                                <!-- Botones de acciones -->
+                                <div class="clase-actions mt-3 d-flex gap-2 justify-content-end">
+                                    <button class="btn btn-outline-primary btn-sm btn-icon"
+                                        th:attr="onclick=|editarClase(${clase.id})|" data-bs-toggle="tooltip"
+                                        title="Editar clase">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm btn-icon"
+                                        th:attr="onclick=|eliminarClase(${clase.id})|" data-bs-toggle="tooltip"
+                                        title="Eliminar clase">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Tabla de Horarios -->
-        <div class="table-responsive" th:fragment="tablaClases">
-            <table class="table table-bordered">
-                <thead class="table-primary">
-                    <tr>
-                        <th>Horario</th>
-                        <th>Lunes</th>
-                        <th>Martes</th>
-                        <th>Miércoles</th>
-                        <th>Jueves</th>
-                        <th>Viernes</th>
-                        <th>Sábado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="horario : ${horarios}">
-                        <td class="fw-bold" 
-                            th:text="${horario.hora}" 
-                            th:data-horario-id="${horario.id}"
-                            onclick="mostrarModalNuevoHorario(this)">10:00</td>
-                        <td th:each="dia : ${#strings.arraySplit('LUNES,MARTES,MIERCOLES,JUEVES,VIERNES,SABADO', ',')}"
-                            th:attr="data-dia=${dia},data-hora=${horario.hora}" 
-                            onclick="mostrarModalClase(this)">
-                            <div th:each="clase : ${clases}" 
-                                 th:if="${clase.dia == dia and clase.horaInicio == horario.hora}">
-                                <span th:text="${clase.titulo}" 
-                                      th:attr="data-clase-id=${clase.id}"
-                                      class="badge bg-primary d-block mb-1">
-                                </span>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- Sección de Horarios -->
+        <div class="card mb-4 shadow-sm horario-wrapper">
+            <div class="card-header d-flex justify-content-between align-items-center bg-gradient">
+                <h5 class="mb-0 text-primary">
+                    <i class="fas fa-calendar-week me-2"></i>Horarios de Clases
+                </h5>
+                <button class="btn btn-primary btn-hover-effect" onclick="mostrarModalNuevoHorario()">
+                    <i class="fas fa-plus me-2"></i>Añadir Horario
+                </button>
+            </div>
+            <div class="card-body bg-light">
+                <div class="table-responsive" th:fragment="tablaClases">
+                    <table class="table table-hover horario-tabla">
+                        <thead>
+                            <tr>
+                                <th class="bg-gradient-primary text-white">Horario</th>
+                                <th class="bg-gradient-primary text-white"
+                                    th:each="dia : ${#strings.arraySplit('LUNES,MARTES,MIERCOLES,JUEVES,VIERNES,SABADO', ',')}">
+                                    <i class="fas fa-calendar-day me-2"></i>
+                                    <span th:text="${dia}">Día</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="horario : ${horarios}">
+                                <td class="hora-columna" th:text="${horario.hora}" th:data-horario-id="${horario.id}"
+                                    onclick="mostrarModalNuevoHorario(this)">
+                                    <i class="fas fa-clock me-2"></i>
+                                    10:00
+                                </td>
+                                <td th:each="dia : ${#strings.arraySplit('LUNES,MARTES,MIERCOLES,JUEVES,VIERNES,SABADO', ',')}"
+                                    th:attr="data-dia=${dia},data-hora=${horario.hora}"
+                                    class="clase-celda" 
+                                    style="cursor: pointer;">
+                                    <div th:each="clase : ${clases}">
+                                        <div th:each="horarioClase : ${clase.horarios}"
+                                            th:if="${horarioClase.dia == dia and horarioClase.hora == horario.hora}"
+                                            class="clase-item">
+                                            <span th:text="${clase.nombre}" 
+                                                th:attr="data-clase-id=${clase.id},data-dia=${dia},data-hora=${horario.hora}"
+                                                class="badge bg-primary d-block clase-badge">
+                                                <i class="fas fa-dumbbell me-2"></i>
+                                                <span th:text="${clase.nombre}">Nombre clase</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </main>
 
+    <div th:replace="~{clases/modal-asignar-clase :: modal}"></div>
+    <div th:replace="~{clases/modal-nueva-clase :: modal}"></div>
+    <div th:replace="~{clases/modal-nuevo-horario :: modal}"></div>
+    <div th:replace="~{clases/modal-gestionar-alumnos :: modal}"></div>
     <div th:replace="~{layout/base :: scripts}"></div>
-    <div th:replace="~{clases/modal-clase :: modal}"></div>
-    <div th:replace="~{clases/modal-horario :: modal-horario}"></div>
-
-    <style>
-        .table td {
-            height: 80px;
-            vertical-align: middle;
-            min-width: 150px;
-            cursor: pointer;
-        }
-    
-        .table td:hover {
-            background-color: rgba(13, 110, 253, 0.1);
-        }
-    
-        .table th {
-            text-align: center;
-            background-color: #0d6efd;
-            color: white;
-        }
-    
-        .table td:first-child {
-            background-color: #f8f9fa;
-            font-weight: bold;
-            min-width: 120px;
-        }
-    
-        .badge {
-            width: 100%;
-            padding: 8px;
-            font-size: 0.9em;
-        }
-    </style>
 </body>
 
 </html>

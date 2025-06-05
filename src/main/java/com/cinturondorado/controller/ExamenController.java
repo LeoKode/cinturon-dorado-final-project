@@ -7,6 +7,7 @@ import com.cinturondorado.model.enums.NivelCinturon;
 import com.cinturondorado.service.ExamenService;
 import com.cinturondorado.service.AlumnoService;
 import com.cinturondorado.service.ProfesorService;
+import com.cinturondorado.service.ClaseService;
 import com.cinturondorado.dto.ExamenDTO;
 import com.cinturondorado.exception.ResourceNotFoundException;
 
@@ -38,13 +39,16 @@ public class ExamenController {
     private final ExamenService examenService;
     private final AlumnoService alumnoService;
     private final ProfesorService profesorService;
+    private final ClaseService claseService;
 
     public ExamenController(ExamenService examenService,
             AlumnoService alumnoService,
-            ProfesorService profesorService) {
+            ProfesorService profesorService,
+            ClaseService claseService) {
         this.examenService = examenService;
         this.alumnoService = alumnoService;
         this.profesorService = profesorService;
+        this.claseService = claseService;
     }
 
     @InitBinder
@@ -83,13 +87,14 @@ public class ExamenController {
             model.addAttribute("page", paginaExamenes);
             model.addAttribute("alumnos", alumnosActivos.getContent());
             model.addAttribute("profesores", profesorService.listarTodos());
+            model.addAttribute("clases", claseService.listarClases()); // Add this line
             model.addAttribute("nivelesCinturon", NivelCinturon.values());
 
             return "examenes/lista";
         } catch (Exception e) {
-            log.error("Error al cargar los exámenes: ", e);
-            model.addAttribute("error", "Error al cargar los exámenes: " + e.getMessage());
-            return "examenes/lista";
+            log.error("Error al listar exámenes: ", e);
+            model.addAttribute("error", "Error al cargar los exámenes");
+            return "error";
         }
     }
 
@@ -193,7 +198,7 @@ public class ExamenController {
     public String buscarExamenes(
             @RequestParam(required = false) NivelCinturon nivelAspirante,
             @RequestParam(required = false) EstadoExamen estado,
-            @RequestParam(required = false) String categoriaAlumno,
+            @RequestParam(required = false) Long claseId, // Changed from String categoriaAlumno
             @RequestParam(required = false) Integer year,
             @PageableDefault(size = 10) Pageable pageable,
             Model model) {
@@ -209,7 +214,7 @@ public class ExamenController {
         Page<Examen> paginaExamenes = examenService.buscarPorFiltros(
                 nivelAspirante, 
                 estado, 
-                categoriaAlumno, 
+                claseId,      // Changed from categoriaAlumno
                 fechaInicio,
                 fechaFin,
                 pageable);
@@ -219,7 +224,7 @@ public class ExamenController {
         model.addAttribute("nivelesCinturon", NivelCinturon.values());
         model.addAttribute("nivelAspiranteSeleccionado", nivelAspirante);
         model.addAttribute("estadoSeleccionado", estado);
-        model.addAttribute("categoriaSeleccionada", categoriaAlumno);
+        model.addAttribute("claseId", claseId); // Changed from categoriaSeleccionada
         model.addAttribute("yearSeleccionado", year);
 
         return "examenes/lista :: tablaExamenes";

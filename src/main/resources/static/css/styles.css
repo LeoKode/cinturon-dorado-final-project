@@ -267,6 +267,7 @@ body {
 
 .card-body {
     padding: 1.25rem;
+    border: 2px solid rgba(13, 110, 253, 0.1);
 }
 
 /* Estilos modernos para las cards del dashboard */
@@ -396,64 +397,6 @@ body {
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 1rem;
-}
-
-/* FullCalendar Custom Styles */
-.fc {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-}
-
-.fc-toolbar-title {
-    font-size: 1.5em !important;
-    font-weight: 500 !important;
-    color: #2c3e50;
-}
-
-.fc-button-primary {
-    background-color: #0d6efd !important;
-    border-color: #0d6efd !important;
-    text-transform: capitalize !important;
-    padding: 8px 16px !important;
-}
-
-.fc-button-primary:hover {
-    background-color: #0b5ed7 !important;
-    border-color: #0a58ca !important;
-}
-
-.fc-day-today {
-    background-color: rgba(13, 110, 253, 0.1) !important;
-}
-
-.fc a {
-    text-decoration: none !important;
-    color: #2c3e50 !important;
-}
-
-/* Draggable Events */
-.fc-event {
-    margin: 0.5rem 0;
-    border: none !important;
-    border-radius: 6px !important;
-    /* transition: all 0.3s ease; */
-}
-
-.fc-event:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.fc-event .fc-event-main {
-    padding: 0.8rem !important;
-    font-size: 0.9rem;
-    font-weight: 500;
-    background: linear-gradient(45deg, #4b6cb7, #182848);
-    border-radius: 6px;
-    color: white;
-    cursor: grab;
 }
 
 /* Layout de clases */
@@ -750,5 +693,151 @@ body {
     }
     100% {
         opacity: 1;
+    }
+}
+
+/* Estilos para las cards de clases */
+.clase-card {
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.clase-badge {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column; /* Cambiar a column para apilar verticalmente */
+}
+
+.horario-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.horario-item .badge {
+    flex: 1; /* Hace que los badges ocupen el mismo espacio */
+    min-width: 100px; /* Ancho mínimo para los badges */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    min-height: 24px;
+    border-radius: 4px;
+}
+
+/* Modificar los estilos específicos de los badges */
+.horario-item .badge.bg-primary {
+    background: linear-gradient(135deg, #0d6efd, #4b6cb7) !important;
+}
+
+.horario-item .badge.bg-info {
+    background: linear-gradient(135deg, #0dcaf0, #0096c7) !important;
+}
+
+/* Efecto hover suave */
+.horario-item .badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+/* Estilos para la tabla de horarios (hacer los selectores más específicos) */
+.horario-tabla {
+    border-radius: 1rem;
+    overflow: hidden;
+    border: none;
+}
+
+.horario-tabla th {
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    border: none;
+}
+
+.horario-tabla td {
+    padding: 1rem;
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+/* Estilos generales para todas las tablas */
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    background-color: transparent;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-top: 1px solid #dee2e6;
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    background-color: #f8f9fa;
+}
+
+.table tbody + tbody {
+    border-top: 2px solid #dee2e6;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0,0,0,.02);
+}
+
+/* Estilos específicos para la tabla de horarios */
+.horario-wrapper .table {
+    border-radius: 1rem;
+    overflow: hidden;
+    border: none;
+}
+
+.horario-wrapper .bg-gradient-primary {
+    background: linear-gradient(45deg, #0d6efd, #0b5ed7);
+    color: white;
+    border: none;
+}
+
+.horario-wrapper .table th {
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    border: none;
+}
+
+.horario-wrapper .table td {
+    padding: 1rem;
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.horario-wrapper .hora-columna {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    border-right: 2px solid rgba(0,0,0,0.05) !important;
+}
+
+/* Media queries para tablas responsivas */
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .table-responsive > .table {
+        margin-bottom: 0;
     }
 }

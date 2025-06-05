@@ -37,9 +37,6 @@ public class Profesor {
     @Enumerated(EnumType.STRING)
     private NivelCinturon nivelCinturon;
     
-    //@OneToMany(mappedBy = "profesor")
-    //private List<Clase> clases;
-    
     private boolean activo = true;
     
     @Column(nullable = false)
@@ -47,4 +44,7 @@ public class Profesor {
     
     @Column(nullable = false)
     private String email;
+
+    @OneToMany(mappedBy = "profesor")
+    private List<Clase> clases;
 } 

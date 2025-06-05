@@ -26,11 +26,14 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label class="col-form-label">Filtrar por categoría</label>
-                        <select class="form-select" id="categoriaAlumno" name="categoriaAlumno">
-                            <option value="">Todas las categorías</option>
-                            <option value="ADULTOS">Adultos</option>
-                            <option value="MENORES">Menores</option>
+                        <label class="col-form-label">Filtrar por clase</label>
+                        <select class="form-select" id="claseId" name="claseId">
+                            <option value="">Todas las clases</option>
+                            <option th:each="clase : ${clases}"
+                                    th:value="${clase.id}"
+                                    th:text="${clase.nombre}"
+                                    th:selected="${claseId == clase.id}">
+                            </option>
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -73,7 +76,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Alumno</th>
-                        <th>Categoría</th>
+                        <th>Clase</th>
                         <th>Nivel Actual</th>
                         <th>Nivel Aspirante</th>
                         <th>Fecha</th>
@@ -85,7 +88,15 @@
                     <tr th:each="examen : ${examenes}">
                         <td th:text="${examen.id}"></td>
                         <td th:text="${examen?.alumno?.nombre ?: 'N/A'}"></td>
-                        <td th:text="${examen.alumno.categoria}"></td>
+                        <td>
+                            <span th:if="${examen.alumno.clases != null and !examen.alumno.clases.empty}"
+                                  th:text="${#strings.listJoin(examen.alumno.clases.![nombre], ', ')}">
+                            </span>
+                            <span th:if="${examen.alumno.clases == null or examen.alumno.clases.empty}" 
+                                  class="text-muted">
+                                Sin clase asignada
+                            </span>
+                        </td>
                         <td>
                             <img th:if="${examen?.nivelActual != null}"
                             th:src="@{'/images/cinturones/' + ${examen.nivelActual.toString().toLowerCase()} + '.png'}"
@@ -144,7 +155,7 @@
     <div th:replace="~{examenes/modal-programar-evaluacion :: modal}"></div>
     <!-- <div th:replace="~{examenes/modal-evaluacion :: modal}"></div> -->
     <!-- <div th:replace="~{examenes/modal-detalles :: modal}"></div> -->
-    <!-- Finally load all scripts -->
+    <!-- Finalmente load all scripts -->
     <div th:replace="~{layout/base :: scripts}"></div>
 </body>
 

@@ -1,13 +1,19 @@
 package com.cinturondorado.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -16,78 +22,103 @@ public class Clase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    /*@ManyToOne
-    @JoinColumn(name = "profesor_id", nullable = false)
-    private Profesor profesor;  */
 
     @Column(nullable = false)
-    private String titulo;
+    private String nombre;
 
-    @Column(name = "dia_semana")
-    private String dia;
+    private String descripcion;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "horario_id", nullable = false)
-    private HorarioDisponible horario;
-    
+    @Column(name = "cupo_maximo", nullable = false)
+    private Integer cupoMaximo = 20; // Valor por defecto
+
+    @ManyToMany
+    @JoinTable(name = "alumno_clase", joinColumns = @JoinColumn(name = "clase_id"), inverseJoinColumns = @JoinColumn(name = "alumno_id"))
+    private Set<Alumno> alumnos = new HashSet<>();
+
     @ManyToOne
-    @JoinColumn(name = "alumno_id")
-    private Alumno alumno;
+    @JoinColumn(name = "profesor_id")
+    private Profesor profesor;
 
-    
-    // Getters
+    @OneToMany(mappedBy = "clase", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<CalendarioClase> calendarioClases = new HashSet<>();
+
+    // Getters y Setters
     public Long getId() {
         return id;
     }
-    
-    // public Profesor getProfesor() {
-    //     return profesor;
-    // }
 
-    public String getTitulo() {
-        return titulo;
-    }
-
-    public String getHoraInicio() {
-        return horario != null ? horario.getHora() : null;
-    }
-
-    public String getDia() {
-        return dia;
-    }
-
-    public HorarioDisponible getHorario() {
-        return horario;
-    }
-    
-    public Alumno getAlumno() {
-        return alumno;
-    }
-
-    
-    // Setters
     public void setId(Long id) {
         this.id = id;
     }
-    
-    // public void setProfesor(Profesor profesor) {
-    //     this.profesor = profesor;
-    // }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setDia(String dia) {
-        this.dia = dia;
+    // Getter para cantidad de alumnos
+    public int getCantidadAlumnos() {
+        return alumnos != null ? alumnos.size() : 0;
     }
 
-    public void setHorario(HorarioDisponible horario) {
-        this.horario = horario;
+    // Método para verificar si hay cupo disponible
+    public boolean tieneCupoDisponible() {
+        return getCantidadAlumnos() < cupoMaximo;
     }
-    
-    public void setAlumno(Alumno alumno) {
-        this.alumno = alumno;
+
+    public Set<CalendarioClase> getHorarios() {
+        return calendarioClases;
     }
-} 
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public Set<Alumno> getAlumnos() {
+        return alumnos;
+    }
+
+    public void setAlumnos(Set<Alumno> alumnos) {
+        this.alumnos = alumnos;
+    }
+
+    public void setHorarios(Set<CalendarioClase> horarios) {
+        this.calendarioClases = horarios;
+    }
+
+    public Integer getCupoMaximo() {
+        return cupoMaximo;
+    }
+
+    public void setCupoMaximo(Integer cupoMaximo) {
+        this.cupoMaximo = cupoMaximo;
+    }
+
+    // Helper methods
+    public void addAlumno(Alumno alumno) {
+        alumnos.add(alumno);
+        alumno.getClases().add(this);
+    }
+
+    public void removeAlumno(Alumno alumno) {
+        alumnos.remove(alumno);
+        alumno.getClases().remove(this);
+    }
+
+    public void addCalendarioClase(CalendarioClase calendarioClase) {
+        calendarioClases.add(calendarioClase);
+        calendarioClase.setClase(this);
+    }
+
+    public void removeCalendarioClase(CalendarioClase calendarioClase) {
+        calendarioClases.remove(calendarioClase);
+        calendarioClase.setClase(null);
+    }
+}

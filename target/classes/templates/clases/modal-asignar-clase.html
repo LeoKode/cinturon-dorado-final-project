@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="modal" class="modal fade" id="claseAsignarModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Asignar Clase al Horario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="asignarClaseForm" th:action="@{/clases/asignar}" method="post">
+                        <input type="hidden" id="claseAsignarId" name="asignacionId">
+                        <input type="hidden" id="diaClase" name="dia">
+                        <input type="hidden" id="horaClase" name="hora">
+                        
+                        <div class="mb-3">
+                            <label for="claseSelect" class="form-label">Seleccionar Clase</label>
+                            <select class="form-select" id="claseSelect" name="claseId" required>
+                                <option value="">Seleccione una clase...</option>
+                                <option th:each="clase : ${clases}" 
+                                        th:value="${clase.id}"
+                                        th:text="${clase.nombre}">
+                                </option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btnEliminarAsignacion" class="btn btn-danger" style="display: none;">
+                        <i class="fas fa-trash me-1"></i>Eliminar Asignación
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" id="btnAsignarClase" form="asignarClaseForm" class="btn btn-primary">Asignar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

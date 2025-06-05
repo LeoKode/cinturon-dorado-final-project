@@ -33,7 +33,7 @@
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/clases}"
                             th:classappend="${#httpServletRequest.getRequestURI().startsWith('/clases')} ? 'active' : ''">
-                            <i class="fas fa-calendar-alt me-1"></i>Calendario
+                            <i class="fas fa-calendar-alt me-1"></i>Clases
                         </a>
                     </li>
                     <li class="nav-item">
@@ -62,15 +62,17 @@
     <div th:fragment="scripts">
         <!-- Bootstrap Bundle -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- FullCalendar JS -->
-        <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
         <!-- Tus scripts -->
         <script th:src="@{/js/main.js}"></script>
-        <script th:src="@{/js/alumnos.js}"></script>
-        <script th:src="@{/js/clases.js}"></script>
-        <script th:src="@{/js/pagos.js}"></script>
-        <script th:src="@{/js/inventario.js}"></script>
-        <script th:src="@{/js/examenes.js}"></script>
+
+        <!-- Cargar scripts específicos basados en la página actual -->
+        <th:block th:with="currentUrl=${#httpServletRequest.requestURI}">
+            <script th:if="${#strings.contains(currentUrl, '/alumnos')}" src="/js/alumnos.js"></script>
+            <script th:if="${#strings.contains(currentUrl, '/clases')}" src="/js/clases.js"></script>
+            <script th:if="${#strings.contains(currentUrl, '/pagos')}" src="/js/pagos.js"></script>
+            <script th:if="${#strings.contains(currentUrl, '/inventario')}" src="/js/inventario.js"></script>
+            <script th:if="${#strings.contains(currentUrl, '/examenes')}" src="/js/examenes.js"></script>
+        </th:block>
     </div>
 </body>
 

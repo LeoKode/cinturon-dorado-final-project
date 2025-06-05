@@ -63,12 +63,13 @@
                                 placeholder="Buscar por nombre..." th:value="${param.nombre}">
                         </div>
                         <div class="col-md-3">
-                            <label for="searchCategoria" class="col-form-label">Filtrar por categoría</label>
-                            <select class="form-select" id="searchCategoria" name="categoria">
-                                <option value="">Todas las categorías</option>
-                                <option th:each="cat : ${T(com.cinturondorado.model.enums.CategoriaAlumno).values()}"
-                                    th:value="${cat.name()}" th:text="${cat}"
-                                    th:selected="${param.categoria != null && param.categoria[0] == cat}">
+                            <label for="searchClaseId" class="col-form-label">Filtrar por clase</label>
+                            <select class="form-select" id="searchClaseId" name="claseId">
+                                <option value="">Todas las clases</option>
+                                <option th:each="clase : ${clases}"
+                                        th:value="${clase.id}"
+                                        th:text="${clase.nombre}"
+                                        th:selected="${param.claseId != null && param.claseId[0] == clase.id}">
                                 </option>
                             </select>
                         </div>
@@ -104,7 +105,7 @@
                             <th>Email</th>
                             <th>Teléfono</th>
                             <th>Cinturón</th>
-                            <th>Categoría</th>
+                            <th>Clase</th>
                             <th>Último Pago</th>
                             <th>Acciones</th>
                         </tr>
@@ -128,16 +129,29 @@
                                     <span th:text="${alumno.nivelCinturon}"></span>
                                 </th:block>
                             </td>
-                            <td th:text="${alumno.categoria}"></td>
+                            <td>
+                                <span th:with="hasClases=${alumno.clases != null and not #sets.isEmpty(alumno.clases)}"
+                                      th:if="${hasClases}"
+                                      th:text="${#strings.listJoin(alumno.clases.![nombre], ', ')}">
+                                </span>
+                                <span th:unless="${alumno.clases != null and not #sets.isEmpty(alumno.clases)}" 
+                                      class="text-muted">
+                                    Sin clase asignada
+                                </span>
+                            </td>
                             <td th:text="${#temporals.format(alumno.ultimoPago, 'dd/MM/yyyy')}"></td>
                             <td>
                                 <div class="btn-group">
-                                    <button class="btn btn-sm btn-primary" th:data-id="${alumno.id}"
+                                    <!-- Reemplazar el botón de editar en la sección de acciones por: -->
+                                    <button class="btn btn-sm btn-primary" 
+                                        th:data-id="${alumno.id}"
                                         th:data-nombre="${alumno.nombre}"
                                         th:data-fecha-nacimiento="${alumno.fechaNacimiento}"
-                                        th:data-email="${alumno.email}" th:data-telefono="${alumno.telefono}"
+                                        th:data-email="${alumno.email}" 
+                                        th:data-telefono="${alumno.telefono}"
                                         th:data-nivel-cinturon="${alumno.nivelCinturon}"
-                                        th:data-categoria="${alumno.categoria}" onclick="editarAlumno(this)"
+                                        th:data-clase-ids="${alumno.clases != null ? #strings.listJoin(alumno.clases.![id], ',') : ''}"
+                                        onclick="editarAlumno(this)"
                                         th:title="Editar">
                                         <i class="fas fa-user-edit mx-1"></i>
                                     </button>

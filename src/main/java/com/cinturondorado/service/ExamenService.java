@@ -4,7 +4,6 @@ import com.cinturondorado.model.Alumno;
 import com.cinturondorado.model.Examen;
 import com.cinturondorado.model.enums.NivelCinturon;
 import com.cinturondorado.model.enums.EstadoExamen;
-import com.cinturondorado.model.enums.CategoriaAlumno;
 import com.cinturondorado.repository.ExamenRepository;
 import com.cinturondorado.dto.ExamenDTO;
 import com.cinturondorado.exception.ResourceNotFoundException;
@@ -163,26 +162,21 @@ public class ExamenService {
     public Page<Examen> buscarPorFiltros(
             NivelCinturon nivelAspirante,
             EstadoExamen estado,
-            String categoriaAlumno,
+            Long claseId,  // Changed from String categoriaAlumno to Long claseId
             LocalDate fechaInicio,
             LocalDate fechaFin,
             Pageable pageable) {
 
         if (fechaInicio != null && fechaFin != null) {
-            // Si hay filtro de año, usar el repositorio con todos los filtros
-            if (categoriaAlumno != null && !categoriaAlumno.isEmpty()) {
-                try {
-                    CategoriaAlumno categoria = CategoriaAlumno.valueOf(categoriaAlumno);
-                    return examenRepository.findByAllFilters(
-                            categoria,
-                            nivelAspirante,
-                            estado,
-                            fechaInicio,
-                            fechaFin,
-                            pageable);
-                } catch (IllegalArgumentException e) {
-                    log.error("Error al convertir categoría: {}", e.getMessage());
-                }
+            // Si hay filtro de fecha, usar el repositorio con todos los filtros
+            if (claseId != null) {
+                return examenRepository.findByAllFilters(
+                        claseId,
+                        nivelAspirante,
+                        estado,
+                        fechaInicio,
+                        fechaFin,
+                        pageable);
             }
             return examenRepository.findByFiltersAndDateRange(
                     nivelAspirante,
@@ -192,18 +186,13 @@ public class ExamenService {
                     pageable);
         }
 
-        // Si no hay filtro de año, usar la lógica existente
-        if (categoriaAlumno != null && !categoriaAlumno.isEmpty()) {
-            try {
-                CategoriaAlumno categoria = CategoriaAlumno.valueOf(categoriaAlumno);
-                return examenRepository.findByAlumnoCategoriaAndFilters(
-                        categoria,
-                        nivelAspirante,
-                        estado,
-                        pageable);
-            } catch (IllegalArgumentException e) {
-                log.error("Error al convertir categoría: {}", e.getMessage());
-            }
+        // Si no hay filtro de fecha, usar la lógica existente
+        if (claseId != null) {
+            return examenRepository.findByAlumnoClaseAndFilters(
+                    claseId,
+                    nivelAspirante,
+                    estado,
+                    pageable);
         }
         return buscarPorFiltrosPaginados(nivelAspirante, estado, pageable);
     }

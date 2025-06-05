@@ -5,34 +5,37 @@ import javax.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 
 import org.hibernate.ResourceClosedException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import com.cinturondorado.model.Alumno;
+import com.cinturondorado.model.Clase;
 import com.cinturondorado.model.enums.NivelCinturon;
-import com.cinturondorado.model.enums.CategoriaAlumno;
 import com.cinturondorado.repository.AlumnoRepository;
+import com.cinturondorado.repository.ClaseRepository;
 import com.cinturondorado.dto.AlumnoDTO;
 import com.cinturondorado.exception.ResourceNotFoundException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @Transactional
 public class AlumnoService {
-    @Autowired
-    private AlumnoRepository alumnoRepository;
+
+    private final AlumnoRepository alumnoRepository;
     private final NotificacionService notificacionService;
+    private final ClaseRepository claseRepository; // Agregado
 
     public AlumnoService(AlumnoRepository alumnoRepository,
-            NotificacionService notificacionService) {
+            NotificacionService notificacionService,
+            ClaseRepository claseRepository) { // Modificado
         this.alumnoRepository = alumnoRepository;
         this.notificacionService = notificacionService;
+        this.claseRepository = claseRepository; // Inicializado
     }
 
     public Alumno registrarAlumno(AlumnoDTO alumnoDTO) {
@@ -48,7 +51,6 @@ public class AlumnoService {
         alumno.setEmail(alumnoDTO.getEmail());
         alumno.setTelefono(alumnoDTO.getTelefono());
         alumno.setNivelCinturon(alumnoDTO.getNivelCinturon()); // Nivel inicial
-        alumno.setCategoria(alumnoDTO.getCategoria());
 
         // Guardar / revisar luego lo de notificar
         Alumno alumnoGuardado = alumnoRepository.save(alumno);
@@ -58,15 +60,19 @@ public class AlumnoService {
     }
 
     public void actualizarAlumno(AlumnoDTO alumnoDTO) {
-        Alumno alumno = alumnoRepository.findById(alumnoDTO.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Alumno no encontrado"));
+        Alumno alumno = obtenerPorId(alumnoDTO.getId());
 
         alumno.setNombre(alumnoDTO.getNombre());
         alumno.setFechaNacimiento(alumnoDTO.getFechaNacimiento());
         alumno.setEmail(alumnoDTO.getEmail());
         alumno.setTelefono(alumnoDTO.getTelefono());
         alumno.setNivelCinturon(alumnoDTO.getNivelCinturon());
-        alumno.setCategoria(alumnoDTO.getCategoria());
+
+        // Actualizar la clase si cambió
+        if (alumnoDTO.getClaseId() != null) {
+            // Limpiar clases anteriores
+            alumno.getClases().clear();
+        }
 
         alumnoRepository.save(alumno);
     }
@@ -138,17 +144,12 @@ public class AlumnoService {
         return alumnoRepository.findByNombreContainingIgnoreCaseAndNivelCinturon(nombre, nivelCinturon);
     }
 
-    public Page<Alumno> buscarPorCategoria(CategoriaAlumno categoria, Pageable pageable) {
-        return alumnoRepository.findByCategoria(categoria, pageable);
+    public Page<Alumno> buscarPorNombreYClase(String nombre, Long claseId, Pageable pageable) {
+        return alumnoRepository.findByNombreContainingIgnoreCaseAndClasesId(nombre, claseId, pageable);
     }
 
-    public Page<Alumno> buscarPorNombreYCategoria(String nombre, CategoriaAlumno categoria, Pageable pageable) {
-        return alumnoRepository.findByNombreContainingIgnoreCaseAndCategoria(nombre, categoria, pageable);
-    }
-
-    public Page<Alumno> buscarPorNivelYCategoria(NivelCinturon nivelCinturon, CategoriaAlumno categoria,
-            Pageable pageable) {
-        return alumnoRepository.findByNivelCinturonAndCategoria(nivelCinturon, categoria, pageable);
+    public Page<Alumno> buscarPorNivelYClase(NivelCinturon nivel, Long claseId, Pageable pageable) {
+        return alumnoRepository.findByNivelCinturonAndClasesId(nivel, claseId, pageable);
     }
 
     public void actualizarAlumno(Alumno alumno) {
@@ -161,5 +162,17 @@ public class AlumnoService {
 
     public Page<Alumno> buscarPorNombreYNivel(String nombre, NivelCinturon nivelCinturon, Pageable pageable) {
         return alumnoRepository.findByNombreContainingIgnoreCaseAndNivelCinturon(nombre, nivelCinturon, pageable);
+    }
+
+    public Page<Alumno> buscarPorClaseId(Long claseId, Pageable pageable) {
+        if (claseId == null) {
+            return alumnoRepository.findAll(pageable);
+        }
+        return alumnoRepository.findByClasesId(claseId, pageable);
+    }
+
+    public List<Alumno> obtenerAlumnosNoInscritosEnClase(Long claseId) {
+        // Usar una consulta JPQL específica para mejor rendimiento
+        return alumnoRepository.findAlumnosNoInscritosEnClase(claseId);
     }
 }

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <div th:fragment="modal" class="modal fade" id="claseEditarModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Clase</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="claseEditarForm" th:action="@{/clases/guardar}" method="post">
+                        <input type="hidden" id="claseEditarId" name="id" th:value="${clase != null ? clase.id : ''}">
+                        <div class="mb-3">
+                            <label for="nombreEditar" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombreEditar" name="nombre" 
+                                   th:value="${clase != null ? clase.nombre : ''}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="descripcionEditar" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="descripcionEditar" name="descripcion" rows="3"
+                                      th:text="${clase != null ? clase.descripcion : ''}"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cupoMaximoEditar" class="form-label">Cupo Máximo</label>
+                            <input type="number" class="form-control" id="cupoMaximoEditar" name="cupoMaximo" 
+                                   min="1" max="100" th:value="${clase != null ? clase.cupoMaximo : '20'}" required>
+                            <div class="form-text">Establece el número máximo de alumnos para esta clase</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" form="claseEditarForm" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

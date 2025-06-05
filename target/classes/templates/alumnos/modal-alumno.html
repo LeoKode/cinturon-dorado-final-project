@@ -2,13 +2,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-    <div th:fragment="modal" class="modal fade" id="nuevoAlumnoModal" tabindex="-1" aria-labelledby="nuevoAlumnoModalLabel" aria-hidden="true">
+    <div th:fragment="modal" class="modal fade" id="nuevoAlumnoModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <!-- Título Dinámico -->
                     <h5 class="modal-title" id="nuevoAlumnoModalLabel">Nuevo Alumno</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <!-- Formulario Enlazado al Objeto 'alumno' -->
@@ -20,28 +20,28 @@
                         <div class="mb-3">
                             <label class="form-label">Nombre</label>
                             <input type="text" class="form-control" th:field="*{nombre}" required />
-                            <div class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}">Nombre Error</div>
+                            <div class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
                         </div>
                         
                         <!-- Campo de Fecha de Nacimiento -->
                         <div class="mb-3">
                             <label class="form-label">Fecha Nacimiento</label>
-                            <input type="date" class="form-control" th:field="*{fechaNacimiento}" required min="1" />
-                            <div class="text-danger" th:if="${#fields.hasErrors('fechaNacimiento')}" th:errors="*{fechaNacimiento}">Edad Error</div>
+                            <input type="date" class="form-control" th:field="*{fechaNacimiento}" required />
+                            <div class="text-danger" th:if="${#fields.hasErrors('fechaNacimiento')}" th:errors="*{fechaNacimiento}"></div>
                         </div>
                         
                         <!-- Campo de Email -->
                         <div class="mb-3">
                             <label class="form-label">Email</label>
                             <input type="email" class="form-control" th:field="*{email}" required />
-                            <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email Error</div>
+                            <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                         </div>
 
                         <!-- Campo de Telefono -->
                         <div class="mb-3">
                             <label class="form-label">Teléfono</label>
                             <input type="text" class="form-control" th:field="*{telefono}" required />
-                            <div class="text-danger" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}">Teléfono Error</div>
+                            <div class="text-danger" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></div>
                         </div>
                         
                         <!-- Campo de Nivel de Cinturón -->
@@ -54,28 +54,8 @@
                                         th:text="${nivel}">
                                 </option>
                             </select>
-                            <div class="text-danger" th:if="${#fields.hasErrors('nivelCinturon')}" th:errors="*{nivelCinturon}">Nivel de Cinturón Error</div>
+                            <div class="text-danger" th:if="${#fields.hasErrors('nivelCinturon')}" th:errors="*{nivelCinturon}"></div>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Categoría</label>
-                            <select class="form-select" th:field="*{categoria}" required>
-                                <option value="">Seleccione una categoría</option>
-                                <option th:each="cat : ${T(com.cinturondorado.model.enums.CategoriaAlumno).values()}"
-                                        th:value="${cat}" 
-                                        th:text="${cat}">
-                                </option>
-                            </select>
-                        </div>
-                        
-                        <!-- Campo de Activo
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" th:field="*{activo}" id="activo" />
-                                <label class="form-check-label" for="activo">Activo</label>
-                                <div class="text-danger" th:if="${#fields.hasErrors('activo')}" th:errors="*{activo}">Activo Error</div>
-                            </div>
-                        </div> -->
                     </form>
                 </div>
                 <div class="modal-footer">

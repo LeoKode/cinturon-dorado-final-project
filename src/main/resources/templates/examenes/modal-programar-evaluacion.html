@@ -11,24 +11,25 @@
                 </div>
                 <div class="modal-body">
                     <form id="examenForm" th:action="@{/examenes}" method="post">
-                        <!-- Añadir selector de categoría -->
+                        <!-- Selector de clase -->
                         <div class="mb-3">
-                            <label for="categoriaFiltro" class="form-label">Categoría de Alumnos</label>
-                            <select class="form-select" id="categoriaFiltro" onchange="filtrarAlumnosPorCategoria()">
-                                <option value="">Todas las categorías</option>
-                                <option value="ADULTOS">Adultos</option>
-                                <option value="MENORES">Menores</option>
+                            <label for="claseId" class="form-label">Clase</label>
+                            <select class="form-select" id="claseId" name="claseId">
+                                <option value="">Seleccione una clase</option>
+                                <option th:each="clase : ${clases}"
+                                        th:value="${clase.id}"
+                                        th:text="${clase.nombre}">
+                                </option>
                             </select>
                         </div>
-                        
-                        <!-- Modificar el select de alumnos -->
+                        <!-- Selector de alumnos -->
                         <div class="mb-3">
                             <label for="alumnoIds" class="form-label">Alumnos</label>
                             <select class="form-select" id="alumnoIds" name="alumnoIds" multiple required>
                                 <option th:each="alumno : ${alumnos}" 
                                         th:value="${alumno.id}"
                                         th:text="${alumno.nombre + ' - ' + alumno.nivelCinturon}"
-                                        th:data-categoria="${alumno.categoria}">
+                                        th:data-clases="${#strings.listJoin(alumno.clases.![nombre], ', ')}">
                                 </option>
                             </select>
                             <small class="form-text text-muted">Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples alumnos</small>

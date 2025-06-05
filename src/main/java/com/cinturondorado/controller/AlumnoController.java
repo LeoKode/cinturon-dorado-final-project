@@ -11,13 +11,12 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import javax.servlet.http.HttpServletRequest;
 
 import com.cinturondorado.dto.AlumnoDTO;
 import com.cinturondorado.model.Alumno;
 import com.cinturondorado.model.enums.NivelCinturon;
-import com.cinturondorado.model.enums.CategoriaAlumno; // Importar enum CategoriaAlumno
 import com.cinturondorado.service.AlumnoService;
+import com.cinturondorado.service.ClaseService;
 
 import javax.validation.Valid;
 
@@ -29,9 +28,11 @@ import java.time.LocalDate;
 public class AlumnoController {
 
     private final AlumnoService alumnoService;
+    private final ClaseService claseService;
 
-    public AlumnoController(AlumnoService alumnoService) {
+    public AlumnoController(AlumnoService alumnoService, ClaseService claseService) {
         this.alumnoService = alumnoService;
+        this.claseService = claseService;
     }
 
     @GetMapping
@@ -51,6 +52,7 @@ public class AlumnoController {
 
         // Agregar atributos al modelo
         model.addAttribute("alumnos", paginaAlumnos.getContent());
+        model.addAttribute("clases", claseService.listarClases());
         model.addAttribute("page", paginaAlumnos);
         model.addAttribute("nivelesCinturon", NivelCinturon.values());
         model.addAttribute("alumno", alumnoDTO);
@@ -84,7 +86,9 @@ public class AlumnoController {
     @GetMapping("/{id}")
     public String editarAlumno(@PathVariable Long id, Model model) {
         Alumno alumno = alumnoService.obtenerPorId(id);
-        model.addAttribute("alumno", alumno);
+        AlumnoDTO alumnoDTO = new AlumnoDTO(alumno);
+        model.addAttribute("alumno", alumnoDTO);
+        model.addAttribute("clases", claseService.listarClases());
         model.addAttribute("nivelesCinturon", NivelCinturon.values());
         return "alumnos/modal-alumno :: modal";
     }
@@ -128,7 +132,7 @@ public class AlumnoController {
     @GetMapping("/buscar")
     public String buscarAlumnos(
             @RequestParam(required = false) String nombre,
-            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) Long claseId,
             @RequestParam(required = false) NivelCinturon nivelCinturon,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
@@ -137,32 +141,21 @@ public class AlumnoController {
         try {
             Pageable pageable = PageRequest.of(page, size);
 
-            // Convert category string to enum if present
-            CategoriaAlumno categoriaEnum = null;
-            if (categoria != null && !categoria.isEmpty()) {
-                try {
-                    categoriaEnum = CategoriaAlumno.valueOf(categoria);
-                } catch (IllegalArgumentException e) {
-                    log.warn("Categoría inválida: {}", categoria);
-                }
-            }
-
-            // Perform search
             Page<Alumno> paginaAlumnos = buscarAlumnosFiltrados(
-                    nombre, categoriaEnum, nivelCinturon, pageable);
+                    nombre, claseId, nivelCinturon, pageable);
 
             // Add required model attributes
             model.addAttribute("alumnos", paginaAlumnos.getContent());
             model.addAttribute("page", paginaAlumnos);
             model.addAttribute("nivelesCinturon", NivelCinturon.values());
+            model.addAttribute("clases", claseService.listarClases()); // Agregar lista de clases
 
             // Add empty AlumnoDTO for form binding
             AlumnoDTO alumnoDTO = new AlumnoDTO();
             alumnoDTO.setFechaNacimiento(LocalDate.of(2005, 1, 1));
             model.addAttribute("alumno", alumnoDTO);
 
-            return "alumnos/lista :: tablaAlumnos"; // Cambiado a tableContainer
-
+            return "alumnos/lista :: tablaAlumnos";
         } catch (Exception e) {
             log.error("Error en búsqueda de alumnos: {}", e.getMessage());
             model.addAttribute("error", "Error al realizar la búsqueda");
@@ -174,22 +167,22 @@ public class AlumnoController {
     // Helper method to handle search logic
     private Page<Alumno> buscarAlumnosFiltrados(
             String nombre,
-            CategoriaAlumno categoria,
+            Long claseId,
             NivelCinturon nivel,
             Pageable pageable) {
 
         if (nombre != null && !nombre.isEmpty()) {
-            if (categoria != null) {
-                return alumnoService.buscarPorNombreYCategoria(nombre, categoria, pageable);
+            if (claseId != null) {
+                return alumnoService.buscarPorNombreYClase(nombre, claseId, pageable);
             } else if (nivel != null) {
                 return alumnoService.buscarPorNombreYNivel(nombre, nivel, pageable);
             }
             return alumnoService.buscarPorNombre(nombre, pageable);
-        } else if (categoria != null) {
+        } else if (claseId != null) {
             if (nivel != null) {
-                return alumnoService.buscarPorNivelYCategoria(nivel, categoria, pageable);
+                return alumnoService.buscarPorNivelYClase(nivel, claseId, pageable);
             }
-            return alumnoService.buscarPorCategoria(categoria, pageable);
+            return alumnoService.buscarPorClaseId(claseId, pageable);
         } else if (nivel != null) {
             return alumnoService.buscarPorNivelCinturon(nivel, pageable);
         }

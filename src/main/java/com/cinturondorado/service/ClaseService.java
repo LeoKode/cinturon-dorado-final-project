@@ -1,16 +1,17 @@
 package com.cinturondorado.service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Sort;
 
+import com.cinturondorado.exception.ResourceNotFoundException;
+import com.cinturondorado.model.Alumno;
 import com.cinturondorado.model.Clase;
-import com.cinturondorado.model.HorarioDisponible;
+import com.cinturondorado.model.CalendarioClase;
+import com.cinturondorado.repository.AlumnoRepository;
 import com.cinturondorado.repository.ClaseRepository;
-import com.cinturondorado.repository.HorarioDisponibleRepository;
+import com.cinturondorado.repository.CalendarioClaseRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,41 +20,18 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class ClaseService {
     private final ClaseRepository claseRepository;
-    private final HorarioDisponibleRepository horarioRepository;
+    private final CalendarioClaseRepository horarioRepository;
+    private final AlumnoRepository alumnoRepository;
 
-    public ClaseService(ClaseRepository claseRepository,
-            HorarioDisponibleRepository horarioRepository) {
+    public ClaseService(ClaseRepository claseRepository, 
+                       CalendarioClaseRepository horarioRepository,
+                       AlumnoRepository alumnoRepository) { 
         this.claseRepository = claseRepository;
         this.horarioRepository = horarioRepository;
+        this.alumnoRepository = alumnoRepository;
     }
 
-    public boolean existeClaseEnHorario(String dia, String horaInicio) {
-        HorarioDisponible horario = horarioRepository.findByHora(horaInicio)
-            .orElse(null);
-        return horario != null && claseRepository.findByDiaAndHorario(dia, horario).isPresent();
-    }
-
-    public boolean esHorarioDisponibleParaClase(Long claseId, String dia, String horaInicio) {
-        log.debug("Verificando disponibilidad del horario para clase ID: {}, día: {}, hora: {}",
-                claseId, dia, horaInicio);
-        
-        HorarioDisponible horario = horarioRepository.findByHora(horaInicio)
-            .orElse(null);
-        
-        if (horario == null) {
-            return true;
-        }
-
-        Optional<Clase> claseExistente = claseRepository.findByDiaAndHorario(dia, horario);
-
-        if (claseExistente.isEmpty()) {
-            return true;
-        }
-
-        return claseExistente.get().getId().equals(claseId);
-    }
-
-    public List<Clase> listarTodasClases() {
+    public List<Clase> listarClases() {
         try {
             log.debug("Obteniendo todas las clases");
             return claseRepository.findAll();
@@ -63,59 +41,110 @@ public class ClaseService {
         }
     }
 
+    public Clase obtenerClase(Long id) {
+        return claseRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Clase no encontrada con ID: " + id));
+    }
+
     public Clase guardarClase(Clase clase) {
-        // Verificar que el horario existe
-        HorarioDisponible horario = horarioRepository.findById(clase.getHorario().getId())
-            .orElseThrow(() -> new IllegalArgumentException("Horario no encontrado"));
-
-        // Verificar disponibilidad
-        if (claseRepository.findByDiaAndHorario(clase.getDia(), horario).isPresent()) {
-            throw new IllegalStateException("Ya existe una clase programada para " +
-                clase.getDia() + " a las " + horario.getHora());
+        try {
+            if (clase.getId() == null && claseRepository.existsByNombre(clase.getNombre())) {
+                throw new IllegalStateException("Ya existe una clase con el nombre: " + clase.getNombre());
+            }
+            return claseRepository.save(clase);
+        } catch (Exception e) {
+            log.error("Error al guardar la clase: ", e);
+            throw new RuntimeException("Error al guardar la clase", e);
         }
+    }
 
-        clase.setHorario(horario);
-        return claseRepository.save(clase);
+    public void asignarHorario(Long claseId, String dia, String hora) {
+        try {
+            Clase clase = obtenerClase(claseId);
+            CalendarioClase calendarioClase = horarioRepository
+                .findByClaseIdAndDiaAndHora(claseId, dia, hora)
+                .orElseGet(() -> {
+                    CalendarioClase nuevoHorario = new CalendarioClase();
+                    nuevoHorario.setDia(dia);
+                    nuevoHorario.setHora(hora);
+                    nuevoHorario.setClase(clase);
+                    return horarioRepository.save(nuevoHorario);
+                });
+
+            clase.addCalendarioClase(calendarioClase);
+            claseRepository.save(clase);
+        } catch (Exception e) {
+            log.error("Error al asignar horario a la clase: ", e);
+            throw new RuntimeException("Error al asignar horario a la clase", e);
+        }
+    }
+
+    public void desasignarHorario(Long claseId, String dia, String hora) {
+        Clase clase = obtenerClase(claseId);
+        CalendarioClase calendarioClase = horarioRepository
+            .findByClaseIdAndDiaAndHora(claseId, dia, hora)
+            .orElseThrow(() -> new IllegalStateException("Horario no encontrado"));
+            
+        clase.removeCalendarioClase(calendarioClase);
+        horarioRepository.delete(calendarioClase);
+        claseRepository.save(clase);
     }
 
     public void eliminarClase(Long id) {
         try {
             log.debug("Eliminando clase con ID: {}", id);
-            if (!claseRepository.existsById(id)) {
-                throw new IllegalArgumentException("No existe una clase con ID: " + id);
-            }
-            claseRepository.deleteById(id);
-            log.debug("Clase eliminada correctamente");
+            Clase clase = obtenerClase(id);
+            claseRepository.delete(clase);
         } catch (Exception e) {
             log.error("Error al eliminar la clase: ", e);
             throw new RuntimeException("Error al eliminar la clase", e);
         }
     }
 
-    public void eliminarHorario(Long id) {
-        HorarioDisponible horario = horarioRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Horario no encontrado"));
-                
-        // Verificar si hay clases en este horario
-        boolean existenClases = false;
-        List<String> diasConClases = new ArrayList<>();
-        String[] dias = { "LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO" };
-        
-        for (String dia : dias) {
-            if (claseRepository.existsByDiaAndHorario(dia, horario)) {
-                existenClases = true;
-                diasConClases.add(dia);
+    public List<CalendarioClase> listarHorarios() {
+        return horarioRepository.findAll(Sort.by(Sort.Direction.ASC, "hora"));
+    }
+
+    public void inscribirAlumno(Long claseId, Long alumnoId) {
+        Clase clase = claseRepository.findById(claseId)
+            .orElseThrow(() -> new ResourceNotFoundException("Clase no encontrada"));
+            
+        Alumno alumno = alumnoRepository.findById(alumnoId)
+            .orElseThrow(() -> new ResourceNotFoundException("Alumno no encontrado"));
+
+        if (!clase.tieneCupoDisponible()) {
+            throw new IllegalStateException("La clase ha alcanzado su cupo máximo");
+        }
+
+        clase.addAlumno(alumno);
+        claseRepository.save(clase);
+    }
+
+    public void desinscribirAlumno(Long claseId, Long alumnoId) {
+        Clase clase = claseRepository.findById(claseId)
+            .orElseThrow(() -> new ResourceNotFoundException("Clase no encontrada"));
+            
+        Alumno alumno = alumnoRepository.findById(alumnoId)
+            .orElseThrow(() -> new ResourceNotFoundException("Alumno no encontrado"));
+
+        clase.removeAlumno(alumno);
+        claseRepository.save(clase);
+    }
+
+    public void agregarHorario(String hora, String dia) {
+        try {
+            if (horarioRepository.existsByDiaAndHora(hora, dia)) {
+                throw new IllegalStateException("Ya existe un horario con esa hora");
             }
-        }
 
-        if (existenClases) {
-            throw new IllegalStateException(
-                "No se puede eliminar el horario porque existen clases programadas en: " + 
-                String.join(", ", diasConClases) + 
-                ". Por favor, elimine primero estas clases."
-            );
+            CalendarioClase nuevoHorario = new CalendarioClase();
+            nuevoHorario.setHora(hora);
+            horarioRepository.save(nuevoHorario);
+            
+            log.debug("Horario agregado correctamente: {}", hora);
+        } catch (Exception e) {
+            log.error("Error al agregar horario: ", e);
+            throw new RuntimeException("Error al agregar el horario", e);
         }
-
-        horarioRepository.delete(horario);
     }
 }

@@ -23,10 +23,6 @@ public class Pago {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @ManyToOne
-    @JoinColumn(name = "alumno_id", nullable = false)
-    private Alumno alumno;
-    
     @Column(name = "fecha", nullable = false, columnDefinition = "DATE")
     private LocalDate fecha;
     
@@ -43,6 +39,10 @@ public class Pago {
     @Column(nullable = false)
     private EstadoPago estado;
     
+    @ManyToOne
+    @JoinColumn(name = "alumno_id", nullable = false)
+    private Alumno alumno;
+
     // Getters
     public Long getId() {
         return id;
